@@ -94,14 +94,20 @@ function registerCoreServices(\App\Core\Services\Container $container): void
         }
     );
     
-    // Authentication Service
+    // Authentication Service (use demo version for development without database)
     $container->singleton(
         \App\Infrastructure\Authentication\AuthenticationService::class,
         function ($c) {
-            return new \App\Infrastructure\Authentication\AuthenticationService(
-                $c->resolve(\App\Infrastructure\Database\Connection::class),
-                config('security')
-            );
+            // Try to use demo authentication (works without database)
+            try {
+                return new \App\Infrastructure\Authentication\DemoAuthenticationService();
+            } catch (Exception $e) {
+                // Fallback to full authentication with database
+                return new \App\Infrastructure\Authentication\AuthenticationService(
+                    $c->resolve(\App\Infrastructure\Database\Connection::class),
+                    config('security')
+                );
+            }
         }
     );
     
