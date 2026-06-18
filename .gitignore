@@ -1,0 +1,71 @@
+# .gitignore
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Dependencies
+vendor/
+node_modules/
+
+# Logs
+storage/logs/*
+!storage/logs/.gitkeep
+
+# Cache
+storage/cache/*
+!storage/cache/.gitkeep
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+database/*.db
+
+# Temporary files
+*.tmp
+*.temp
+.tmp/
+
+# Build artifacts
+dist/
+build/
+out/
+
+# Test coverage
+coverage/
+.phpunit.result.cache
+
+# Composer
+composer.lock
+
+# Node
+package-lock.json
+yarn.lock
+
+# IDE metadata
+*.iml
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# Personal notes
+notes.md
+todo.md

@@ -1,0 +1,5 @@
+<?php
+/**
+ * Storage directories placeholder files
+ */
+// This file ensures the storage/logs directory exists

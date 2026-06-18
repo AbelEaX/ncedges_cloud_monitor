@@ -1,0 +1,183 @@
+<?php
+$config = require __DIR__ . '/config.php';
+$statusFile = __DIR__ . '/status.json';
+
+if (!file_exists($statusFile)) {
+    file_put_contents($statusFile, json_encode([]));
+}
+
+$previousStatus = json_decode(file_get_contents($statusFile), true);
+$currentStatus  = [];
+$now = time();
+
+/* ---- Server check function ---- */
+function checkServer($host, $port, $timeout) {
+    $fp = @fsockopen($host, $port, $errno, $errstr, $timeout);
+    if ($fp) {
+        fclose($fp);
+        return true;
+    }
+    return false;
+}
+
+/* ---- Email alert ---- */
+function sendAlert($to, $from, $subject, $message) {
+    $headers = "From: {$from}\r\nContent-Type: text/plain";
+    @mail($to, $subject, $message, $headers);
+}
+
+/* ---- Check servers ---- */
+foreach ($config['servers'] as $server) {
+
+    $key = md5($server['host'] . $server['port']);
+    $isUp = checkServer($server['host'], $server['port'], $config['check_timeout']);
+
+    $prev = $previousStatus[$key] ?? [
+        'status' => 'unknown',
+        'since'  => $now,
+        'alert_sent' => false
+    ];
+
+    if ($isUp) {
+        $currentStatus[$key] = [
+            'name' => $server['name'],
+            'status' => 'up',
+            'since' => ($prev['status'] === 'up') ? $prev['since'] : $now,
+            'alert_sent' => false
+        ];
+    } else {
+        $downSince = ($prev['status'] === 'down') ? $prev['since'] : $now;
+        $downtime  = $now - $downSince;
+
+        if ($downtime >= $config['alert_after'] && !$prev['alert_sent']) {
+            sendAlert(
+                $config['alert_email'],
+                $config['email_from'],
+                "🚨 Server DOWN: {$server['name']}",
+                "{$server['name']} ({$server['host']}:{$server['port']}) has been DOWN for over 5 minutes."
+            );
+            $alertSent = true;
+        } else {
+            $alertSent = $prev['alert_sent'];
+        }
+
+        $currentStatus[$key] = [
+            'name' => $server['name'],
+            'status' => 'down',
+            'since' => $downSince,
+            'alert_sent' => $alertSent
+        ];
+    }
+}
+
+file_put_contents($statusFile, json_encode($currentStatus, JSON_PRETTY_PRINT));
+
+/* ---- Helper ---- */
+function duration($seconds) {
+    $h = floor($seconds / 3600);
+    $m = floor(($seconds % 3600) / 60);
+    $s = $seconds % 60;
+    return sprintf('%02dh %02dm %02ds', $h, $m, $s);
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title><?= $config['company_name']; ?> - Server Status</title>
+
+<style>
+body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #0f172a;
+    color: #e5e7eb;
+    margin: 0;
+    padding: 30px;
+}
+
+.container {
+    max-width: 900px;
+    margin: auto;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.subtitle {
+    text-align: center;
+    color: #94a3b8;
+    margin-bottom: 30px;
+}
+
+.card {
+    background: #020617;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 0 20px rgba(0,0,0,.4);
+}
+
+.status {
+    font-weight: bold;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 14px;
+}
+
+.up {
+    background: rgba(34,197,94,.15);
+    color: #22c55e;
+}
+
+.down {
+    background: rgba(239,68,68,.15);
+    color: #ef4444;
+}
+
+.time {
+    color: #94a3b8;
+    font-size: 14px;
+}
+footer {
+    text-align: center;
+    margin-top: 40px;
+    font-size: 13px;
+    color: #64748b;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<h1><?= $config['company_name']; ?> Status</h1>
+<div class="subtitle">Real-time server availability monitoring</div>
+
+<?php foreach ($currentStatus as $srv): ?>
+<?php $elapsed = time() - $srv['since']; ?>
+<div class="card">
+    <div>
+        <strong><?= htmlspecialchars($srv['name']); ?></strong><br>
+        <span class="time">
+            <?= ucfirst($srv['status']); ?> for <?= duration($elapsed); ?>
+        </span>
+    </div>
+    <div class="status <?= $srv['status']; ?>">
+        <?= strtoupper($srv['status']); ?>
+    </div>
+</div>
+<?php endforeach; ?>
+
+<footer>
+    © <?= date('Y'); ?> <?= $config['company_name']; ?> • Status refreshed on page load
+</footer>
+
+</div>
+</body>
+</html>
