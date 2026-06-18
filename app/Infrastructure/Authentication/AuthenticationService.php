@@ -108,6 +108,19 @@ class AuthenticationService
     }
     
     /**
+     * Alias for getUser() for framework consistency
+     * 
+     * @return UserWrapper|null
+     */
+    public function user(): ?UserWrapper
+    {
+        if (!$this->user) {
+            return null;
+        }
+        return new UserWrapper($this->user);
+    }
+    
+    /**
      * Get user by ID
      * 
      * @param int $id
