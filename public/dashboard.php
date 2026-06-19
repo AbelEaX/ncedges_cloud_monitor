@@ -16,7 +16,13 @@ if (!$auth->isAuthenticated()) {
 
 $user = $auth->user();
 $audit = app(\App\Infrastructure\Logging\AuditService::class);
-$audit->log('view', 'dashboard', null, $user->getId(), 'Viewed dashboard');
+$audit->log('view', 'dashboard', null, $user->getId(), ['message' => 'Viewed dashboard']);
+
+// Output the view
+// Reverting back to original file content
+$user = $auth->user();
+$audit = app(\App\Infrastructure\Logging\AuditService::class);
+$audit->log('view', 'dashboard', null, $user->getId(), ['message' => 'Viewed dashboard']);
 
 ?>
 <!DOCTYPE html>
@@ -221,12 +227,12 @@ $audit->log('view', 'dashboard', null, $user->getId(), 'Viewed dashboard');
                 <a href="/reports.php">Reports</a>
             </div>
             <div class="nav-user">
-                <div class="user-avatar"><?php echo strtoupper(substr($user->getFirstName() ?? 'U', 0, 1)); ?></div>
+                <div class="user-avatar"><?php echo strtoupper(substr($user->getUsername() ?? 'U', 0, 1)); ?></div>
                 <div style="font-size: 14px;">
-                    <div style="font-weight: 500;"><?php echo htmlspecialchars(($user->getFirstName() ?? 'User') . ' ' . ($user->getLastName() ?? '')); ?></div>
+                    <div style="font-weight: 500;"><?php echo htmlspecialchars($user->getUsername() ?? 'User'); ?></div>
                     <div style="color: #6b7280; font-size: 12px;"><?php echo ucfirst($user->getRole()); ?></div>
                 </div>
-                <form action="/logout.php" method="POST" style="margin: 0;">
+                <form action="/api/auth/logout.php" method="POST" style="margin: 0;">
                     <button type="submit" class="logout-btn">Logout</button>
                 </form>
             </div>
@@ -235,7 +241,7 @@ $audit->log('view', 'dashboard', null, $user->getId(), 'Viewed dashboard');
 
     <div class="container">
         <div class="welcome">
-            <h1>Welcome, <?php echo htmlspecialchars($user->getFirstName() ?? 'Admin'); ?>! 👋</h1>
+            <h1>Welcome, <?php echo htmlspecialchars($user->getUsername() ?? 'Admin'); ?>! 👋</h1>
             <p>Monitor your cloud infrastructure in real-time</p>
         </div>
 

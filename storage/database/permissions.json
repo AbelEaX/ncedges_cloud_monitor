@@ -1,0 +1,221 @@
+{
+    "data": [
+        {
+            "name": "server.view",
+            "description": "View servers",
+            "created_at": "NOW(",
+            "id": 1
+        },
+        {
+            "name": "server.create",
+            "description": "Create servers",
+            "created_at": "NOW(",
+            "id": 2
+        },
+        {
+            "name": "server.edit",
+            "description": "Edit servers",
+            "created_at": "NOW(",
+            "id": 3
+        },
+        {
+            "name": "server.delete",
+            "description": "Delete servers",
+            "created_at": "NOW(",
+            "id": 4
+        },
+        {
+            "name": "user.view",
+            "description": "View users",
+            "created_at": "NOW(",
+            "id": 5
+        },
+        {
+            "name": "user.create",
+            "description": "Create users",
+            "created_at": "NOW(",
+            "id": 6
+        },
+        {
+            "name": "user.edit",
+            "description": "Edit users",
+            "created_at": "NOW(",
+            "id": 7
+        },
+        {
+            "name": "user.delete",
+            "description": "Delete users",
+            "created_at": "NOW(",
+            "id": 8
+        },
+        {
+            "name": "settings.view",
+            "description": "View settings",
+            "created_at": "NOW(",
+            "id": 9
+        },
+        {
+            "name": "settings.edit",
+            "description": "Edit settings",
+            "created_at": "NOW(",
+            "id": 10
+        },
+        {
+            "name": "reports.view",
+            "description": "View reports",
+            "created_at": "NOW(",
+            "id": 11
+        },
+        {
+            "name": "audit.view",
+            "description": "View audit logs",
+            "created_at": "NOW(",
+            "id": 12
+        },
+        {
+            "name": "server.view",
+            "description": "View servers",
+            "created_at": "NOW(",
+            "id": 13
+        },
+        {
+            "name": "server.create",
+            "description": "Create servers",
+            "created_at": "NOW(",
+            "id": 14
+        },
+        {
+            "name": "server.edit",
+            "description": "Edit servers",
+            "created_at": "NOW(",
+            "id": 15
+        },
+        {
+            "name": "server.delete",
+            "description": "Delete servers",
+            "created_at": "NOW(",
+            "id": 16
+        },
+        {
+            "name": "user.view",
+            "description": "View users",
+            "created_at": "NOW(",
+            "id": 17
+        },
+        {
+            "name": "user.create",
+            "description": "Create users",
+            "created_at": "NOW(",
+            "id": 18
+        },
+        {
+            "name": "user.edit",
+            "description": "Edit users",
+            "created_at": "NOW(",
+            "id": 19
+        },
+        {
+            "name": "user.delete",
+            "description": "Delete users",
+            "created_at": "NOW(",
+            "id": 20
+        },
+        {
+            "name": "settings.view",
+            "description": "View settings",
+            "created_at": "NOW(",
+            "id": 21
+        },
+        {
+            "name": "settings.edit",
+            "description": "Edit settings",
+            "created_at": "NOW(",
+            "id": 22
+        },
+        {
+            "name": "reports.view",
+            "description": "View reports",
+            "created_at": "NOW(",
+            "id": 23
+        },
+        {
+            "name": "audit.view",
+            "description": "View audit logs",
+            "created_at": "NOW(",
+            "id": 24
+        },
+        {
+            "name": "server.view",
+            "description": "View servers",
+            "created_at": "NOW(",
+            "id": 25
+        },
+        {
+            "name": "server.create",
+            "description": "Create servers",
+            "created_at": "NOW(",
+            "id": 26
+        },
+        {
+            "name": "server.edit",
+            "description": "Edit servers",
+            "created_at": "NOW(",
+            "id": 27
+        },
+        {
+            "name": "server.delete",
+            "description": "Delete servers",
+            "created_at": "NOW(",
+            "id": 28
+        },
+        {
+            "name": "user.view",
+            "description": "View users",
+            "created_at": "NOW(",
+            "id": 29
+        },
+        {
+            "name": "user.create",
+            "description": "Create users",
+            "created_at": "NOW(",
+            "id": 30
+        },
+        {
+            "name": "user.edit",
+            "description": "Edit users",
+            "created_at": "NOW(",
+            "id": 31
+        },
+        {
+            "name": "user.delete",
+            "description": "Delete users",
+            "created_at": "NOW(",
+            "id": 32
+        },
+        {
+            "name": "settings.view",
+            "description": "View settings",
+            "created_at": "NOW(",
+            "id": 33
+        },
+        {
+            "name": "settings.edit",
+            "description": "Edit settings",
+            "created_at": "NOW(",
+            "id": 34
+        },
+        {
+            "name": "reports.view",
+            "description": "View reports",
+            "created_at": "NOW(",
+            "id": 35
+        },
+        {
+            "name": "audit.view",
+            "description": "View audit logs",
+            "created_at": "NOW(",
+            "id": 36
+        }
+    ],
+    "sequence": 36
+}

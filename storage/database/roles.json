@@ -1,0 +1,59 @@
+{
+    "data": [
+        {
+            "name": "admin",
+            "description": "Administrator with full access",
+            "created_at": "NOW(",
+            "id": 1
+        },
+        {
+            "name": "manager",
+            "description": "Manager with limited access",
+            "created_at": "NOW(",
+            "id": 2
+        },
+        {
+            "name": "viewer",
+            "description": "Viewer with read-only access",
+            "created_at": "NOW(",
+            "id": 3
+        },
+        {
+            "name": "admin",
+            "description": "Administrator with full access",
+            "created_at": "NOW(",
+            "id": 4
+        },
+        {
+            "name": "manager",
+            "description": "Manager with limited access",
+            "created_at": "NOW(",
+            "id": 5
+        },
+        {
+            "name": "viewer",
+            "description": "Viewer with read-only access",
+            "created_at": "NOW(",
+            "id": 6
+        },
+        {
+            "name": "admin",
+            "description": "Administrator with full access",
+            "created_at": "NOW(",
+            "id": 7
+        },
+        {
+            "name": "manager",
+            "description": "Manager with limited access",
+            "created_at": "NOW(",
+            "id": 8
+        },
+        {
+            "name": "viewer",
+            "description": "Viewer with read-only access",
+            "created_at": "NOW(",
+            "id": 9
+        }
+    ],
+    "sequence": 9
+}

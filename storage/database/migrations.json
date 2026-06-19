@@ -1,0 +1,95 @@
+{
+    "data": [
+        {
+            "migration": "2026_01_01_000001_create_users_table",
+            "batch": 1,
+            "id": 1
+        },
+        {
+            "migration": "2026_01_01_000002_create_roles_table",
+            "batch": 1,
+            "id": 2
+        },
+        {
+            "migration": "2026_01_01_000003_create_permissions_table",
+            "batch": 1,
+            "id": 3
+        },
+        {
+            "migration": "2026_01_01_000004_create_servers_table",
+            "batch": 1,
+            "id": 4
+        },
+        {
+            "migration": "2026_01_01_000005_create_server_metrics_table",
+            "batch": 1,
+            "id": 5
+        },
+        {
+            "migration": "2026_01_01_000006_create_notifications_table",
+            "batch": 1,
+            "id": 6
+        },
+        {
+            "migration": "2026_01_01_000007_create_activities_table",
+            "batch": 1,
+            "id": 7
+        },
+        {
+            "migration": "2026_01_01_000008_create_audit_logs_table",
+            "batch": 1,
+            "id": 8
+        },
+        {
+            "migration": "2026_01_01_000009_create_settings_table",
+            "batch": 1,
+            "id": 9
+        },
+        {
+            "migration": "2026_01_01_000001_create_users_table",
+            "batch": 1,
+            "id": 10
+        },
+        {
+            "migration": "2026_01_01_000002_create_roles_table",
+            "batch": 1,
+            "id": 11
+        },
+        {
+            "migration": "2026_01_01_000003_create_permissions_table",
+            "batch": 1,
+            "id": 12
+        },
+        {
+            "migration": "2026_01_01_000004_create_servers_table",
+            "batch": 1,
+            "id": 13
+        },
+        {
+            "migration": "2026_01_01_000005_create_server_metrics_table",
+            "batch": 1,
+            "id": 14
+        },
+        {
+            "migration": "2026_01_01_000006_create_notifications_table",
+            "batch": 1,
+            "id": 15
+        },
+        {
+            "migration": "2026_01_01_000007_create_activities_table",
+            "batch": 1,
+            "id": 16
+        },
+        {
+            "migration": "2026_01_01_000008_create_audit_logs_table",
+            "batch": 1,
+            "id": 17
+        },
+        {
+            "migration": "2026_01_01_000009_create_settings_table",
+            "batch": 1,
+            "id": 18
+        }
+    ],
+    "sequence": 18
+}

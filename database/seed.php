@@ -184,29 +184,29 @@ class DatabaseSeeder
         $servers = [
             [
                 'name' => 'Web Server 1',
-                'hostname' => 'web1.ncedges.com',
-                'ip_address' => '192.168.1.10',
+                'host' => 'web1.ncedges.com',
+                'port' => 443,
                 'description' => 'Primary web server',
                 'is_active' => 1,
             ],
             [
                 'name' => 'Web Server 2',
-                'hostname' => 'web2.ncedges.com',
-                'ip_address' => '192.168.1.11',
+                'host' => 'web2.ncedges.com',
+                'port' => 443,
                 'description' => 'Secondary web server',
                 'is_active' => 1,
             ],
             [
                 'name' => 'Database Server',
-                'hostname' => 'db.ncedges.com',
-                'ip_address' => '192.168.1.20',
+                'host' => 'db.ncedges.com',
+                'port' => 3306,
                 'description' => 'Primary database server',
                 'is_active' => 1,
             ],
             [
                 'name' => 'Mail Server',
-                'hostname' => 'mail.ncedges.com',
-                'ip_address' => '192.168.1.30',
+                'host' => 'mail.ncedges.com',
+                'port' => 25,
                 'description' => 'Email server',
                 'is_active' => 1,
             ],
@@ -214,16 +214,16 @@ class DatabaseSeeder
 
         $pdo = $this->connection->getPDO();
         $stmt = $pdo->prepare(
-            'INSERT INTO servers (name, hostname, ip_address, description, is_active, created_at)
-             VALUES (?, ?, ?, ?, ?, NOW())'
+            'INSERT INTO servers (name, host, port, description, is_active, created_at)
+             VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)'
         );
 
         foreach ($servers as $server) {
             try {
                 $stmt->execute([
                     $server['name'],
-                    $server['hostname'],
-                    $server['ip_address'],
+                    $server['host'],
+                    $server['port'],
                     $server['description'],
                     $server['is_active'],
                 ]);

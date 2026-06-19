@@ -41,7 +41,7 @@ try {
 
     // Log action
     $audit = app(\App\Infrastructure\Logging\AuditService::class);
-    $audit->log('read', 'servers', null, $auth->user()->id, 'Retrieved server list');
+    $audit->log('read', 'servers', null, $auth->user()->id, ['message' => 'Retrieved server list']);
 
     header('Content-Type: application/json');
     echo json_encode([

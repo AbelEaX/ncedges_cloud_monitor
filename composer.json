@@ -1,6 +1,8 @@
 {
     "require": {
-        "phpmailer/phpmailer": "^7.0"
+        "phpmailer/phpmailer": "^7.0",
+        "phpoffice/phpspreadsheet": "*",
+        "tecnickcom/tcpdf": "*"
     },
     "autoload": {
         "psr-4": {

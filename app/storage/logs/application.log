@@ -1,0 +1,4 @@
+[2026-06-19 09:13:28] [ERROR] Migration failed: 2026_01_01_000001_create_users_table | Context: {"error":"Migration class not found: Database\\Migrations\\000001CreateUsersTable"}
+[2026-06-19 09:14:22] [INFO] Database seeding completed
+[2026-06-19 10:22:12] [INFO] Database seeding completed
+[2026-06-19 10:30:45] [INFO] Database seeding completed

@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Infrastructure\Database;
+
 /**
  * File-Based Database Simulator
  *
@@ -110,7 +112,31 @@ class FileDatabaseStatement
         if (preg_match('/INSERT\s+INTO\s+(\w+)\s*\((.*?)\)\s*VALUES\s*\((.*?)\)/i', $this->sql, $matches)) {
             $table = strtolower($matches[1]);
             $columns = array_map('trim', explode(',', $matches[2]));
-            $record = array_combine($columns, $this->values);
+            $valuesPart = $matches[3];
+            
+            // Parse VALUES part - handle both ? placeholders and function calls
+            $valueItems = array_map('trim', explode(',', $valuesPart));
+            $record = [];
+            $valueIndex = 0;
+            
+            foreach ($columns as $i => $column) {
+                $valueItem = $valueItems[$i];
+                if ($valueItem === '?') {
+                    // Use the provided value
+                    $record[$column] = $this->values[$valueIndex] ?? null;
+                    $valueIndex++;
+                } elseif (preg_match('/NOW\(\)/i', $valueItem)) {
+                    // Handle NOW() function
+                    $record[$column] = date('Y-m-d H:i:s');
+                } elseif (preg_match('/CURRENT_TIMESTAMP/i', $valueItem)) {
+                    // Handle CURRENT_TIMESTAMP
+                    $record[$column] = date('Y-m-d H:i:s');
+                } else {
+                    // Handle literal values
+                    $record[$column] = $valueItem;
+                }
+            }
+            
             $this->db->insert($table, $record);
             return;
         }

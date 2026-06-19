@@ -98,16 +98,10 @@ function registerCoreServices(\App\Core\Services\Container $container): void
     $container->singleton(
         \App\Infrastructure\Authentication\AuthenticationService::class,
         function ($c) {
-            // Try to use demo authentication (works without database)
-            try {
-                return new \App\Infrastructure\Authentication\DemoAuthenticationService();
-            } catch (Exception $e) {
-                // Fallback to full authentication with database
-                return new \App\Infrastructure\Authentication\AuthenticationService(
-                    $c->resolve(\App\Infrastructure\Database\Connection::class),
-                    config('security')
-                );
-            }
+            return new \App\Infrastructure\Authentication\AuthenticationService(
+                $c->resolve(\App\Infrastructure\Database\Connection::class),
+                config('security')
+            );
         }
     );
     
@@ -129,7 +123,8 @@ function registerCoreServices(\App\Core\Services\Container $container): void
             return new \App\Infrastructure\Notifications\NotificationManager(
                 config('notifications'),
                 $c->resolve(\App\Infrastructure\Mail\MailService::class),
-                $c->resolve(\App\Infrastructure\Logging\Logger::class)
+                $c->resolve(\App\Infrastructure\Logging\Logger::class),
+                $c->resolve(\App\Infrastructure\Database\Connection::class)
             );
         }
     );

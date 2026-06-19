@@ -73,22 +73,21 @@ class AuditService
         $ip_address = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
         $user_agent = $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';
         
-        // TODO: Insert into audit_logs table when DB structure is ready
-        // $this->connection->insert('audit_logs', [
-        //     'action' => $action,
-        //     'entity_type' => $entity_type,
-        //     'entity_id' => $entity_id,
-        //     'user_id' => $user_id,
-        //     'details' => json_encode($details),
-        //     'severity' => $severity,
-        //     'ip_address' => $ip_address,
-        //     'user_agent' => $user_agent,
-        //     'created_at' => $timestamp,
-        // ]);
+        // Insert into audit_logs table
+        $this->connection->insert('audit_logs', [
+            'action' => $action,
+            'entity_type' => $entity_type,
+            'entity_id' => $entity_id,
+            'user_id' => $user_id,
+            'details' => json_encode($details),
+            'severity' => $severity,
+            'ip_address' => $ip_address,
+            'user_agent' => $user_agent,
+            'created_at' => $timestamp,
+        ]);
         
         // Also log to security log
-        $this->logger->log(
-            strtoupper($severity),
+        $this->logger->info(
             "Audit: {$action} on {$entity_type}",
             array_merge($details, [
                 'entity_id' => $entity_id,
@@ -215,9 +214,38 @@ class AuditService
      */
     public function getAuditLogs(int $limit = 100, int $offset = 0, array $filters = []): array
     {
-        // TODO: Query audit_logs table with filters
-        // For now, return empty array
-        return [];
+        // Build query
+        $query = 'SELECT * FROM audit_logs';
+        $params = [];
+        $conditions = [];
+
+        if (!empty($filters['user_id'])) {
+            $conditions[] = 'user_id = ?';
+            $params[] = $filters['user_id'];
+        }
+        
+        if (!empty($filters['action'])) {
+            $conditions[] = 'action = ?';
+            $params[] = $filters['action'];
+        }
+        
+        if (!empty($filters['entity_type'])) {
+            $conditions[] = 'entity_type = ?';
+            $params[] = $filters['entity_type'];
+        }
+
+        if (!empty($conditions)) {
+            $query .= ' WHERE ' . implode(' AND ', $conditions);
+        }
+
+        $query .= ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
+        $params[] = $limit;
+        $params[] = $offset;
+
+        $pdo = $this->connection->getPDO();
+        $stmt = $pdo->prepare($query);
+        $stmt->execute($params);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
     
     /**

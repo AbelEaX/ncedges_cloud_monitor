@@ -177,8 +177,13 @@
 <body>
     <div class="container">
         <header>
-            <h1>Settings</h1>
-            <p style="color: #6b7280; margin-top: 5px;">Configure application settings and preferences</p>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <a href="/dashboard.php" style="text-decoration: none; font-size: 24px; color: #6b7280;" title="Back to Dashboard">←</a>
+                <div>
+                    <h1>Settings</h1>
+                    <p style="color: #6b7280; margin-top: 5px;">Configure application settings and preferences</p>
+                </div>
+            </div>
         </header>
 
         <div id="alert" class="alert"></div>

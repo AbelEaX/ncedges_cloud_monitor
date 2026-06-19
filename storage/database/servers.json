@@ -1,0 +1,113 @@
+{
+    "data": [
+        {
+            "name": "Web Server 1",
+            "hostname": "web1.ncedges.com",
+            "ip_address": "192.168.1.10",
+            "description": "Primary web server",
+            "is_active": 1,
+            "created_at": "NOW(",
+            "id": 1
+        },
+        {
+            "name": "Web Server 2",
+            "hostname": "web2.ncedges.com",
+            "ip_address": "192.168.1.11",
+            "description": "Secondary web server",
+            "is_active": 1,
+            "created_at": "NOW(",
+            "id": 2
+        },
+        {
+            "name": "Database Server",
+            "hostname": "db.ncedges.com",
+            "ip_address": "192.168.1.20",
+            "description": "Primary database server",
+            "is_active": 1,
+            "created_at": "NOW(",
+            "id": 3
+        },
+        {
+            "name": "Mail Server",
+            "hostname": "mail.ncedges.com",
+            "ip_address": "192.168.1.30",
+            "description": "Email server",
+            "is_active": 1,
+            "created_at": "NOW(",
+            "id": 4
+        },
+        {
+            "name": "Web Server 1",
+            "hostname": "web1.ncedges.com",
+            "ip_address": "192.168.1.10",
+            "description": "Primary web server",
+            "is_active": 1,
+            "created_at": "NOW(",
+            "id": 5
+        },
+        {
+            "name": "Web Server 2",
+            "hostname": "web2.ncedges.com",
+            "ip_address": "192.168.1.11",
+            "description": "Secondary web server",
+            "is_active": 1,
+            "created_at": "NOW(",
+            "id": 6
+        },
+        {
+            "name": "Database Server",
+            "hostname": "db.ncedges.com",
+            "ip_address": "192.168.1.20",
+            "description": "Primary database server",
+            "is_active": 1,
+            "created_at": "NOW(",
+            "id": 7
+        },
+        {
+            "name": "Mail Server",
+            "hostname": "mail.ncedges.com",
+            "ip_address": "192.168.1.30",
+            "description": "Email server",
+            "is_active": 1,
+            "created_at": "NOW(",
+            "id": 8
+        },
+        {
+            "name": "Web Server 1",
+            "host": "web1.ncedges.com",
+            "port": 443,
+            "description": "Primary web server",
+            "is_active": 1,
+            "created_at": "2026-06-19 10:30:45",
+            "id": 9
+        },
+        {
+            "name": "Web Server 2",
+            "host": "web2.ncedges.com",
+            "port": 443,
+            "description": "Secondary web server",
+            "is_active": 1,
+            "created_at": "2026-06-19 10:30:45",
+            "id": 10
+        },
+        {
+            "name": "Database Server",
+            "host": "db.ncedges.com",
+            "port": 3306,
+            "description": "Primary database server",
+            "is_active": 1,
+            "created_at": "2026-06-19 10:30:45",
+            "id": 11
+        },
+        {
+            "name": "Mail Server",
+            "host": "mail.ncedges.com",
+            "port": 25,
+            "description": "Email server",
+            "is_active": 1,
+            "created_at": "2026-06-19 10:30:45",
+            "id": 12
+        }
+    ],
+    "sequence": 12
+}

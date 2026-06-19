@@ -29,7 +29,7 @@ try {
 
     // Log action
     $audit = app(\App\Infrastructure\Logging\AuditService::class);
-    $audit->log('read', 'reports_metrics', null, $auth->user()->id, "Retrieved metrics for period: $range");
+    $audit->log('read', 'reports_metrics', null, $auth->user()->id, ['message' => "Retrieved metrics for period: $range"]);
 
     header('Content-Type: application/json');
     echo json_encode([

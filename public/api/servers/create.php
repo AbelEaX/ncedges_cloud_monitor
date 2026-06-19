@@ -38,7 +38,7 @@ try {
 
     // Log action
     $audit = app(\App\Infrastructure\Logging\AuditService::class);
-    $audit->log('create', 'servers', $serverId, $auth->user()->id, 'Created new server', (array)$server);
+    $audit->log('create', 'servers', $serverId, $auth->user()->id, ['message' => 'Created new server', 'server' => (array)$server], 'info');
 
     header('Content-Type: application/json');
     echo json_encode([

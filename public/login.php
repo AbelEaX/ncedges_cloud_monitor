@@ -12,4 +12,9 @@ if ($auth->isAuthenticated()) {
 }
 
 // Display login form
-echo view('auth.login');
+try {
+    echo view('auth.login');
+} catch (Exception $e) {
+    // Fallback if view fails
+    echo '<h1>Login</h1><p>Error loading view: ' . htmlspecialchars($e->getMessage()) . '</p>';
+}

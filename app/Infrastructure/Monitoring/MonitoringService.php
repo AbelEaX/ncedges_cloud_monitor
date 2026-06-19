@@ -168,8 +168,12 @@ class MonitoringService
      */
     protected function updateServerStatus(int $serverId, string $status): void
     {
-        // TODO: Update in database when DB structure is ready
-        // $this->connection->update('servers', ['status' => $status], 'id = ?', [$serverId]);
+        // Update in database
+        $this->connection->update('servers', [
+            'status' => $status,
+            'last_status_change_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s')
+        ], 'id = ?', [$serverId]);
     }
     
     /**
@@ -212,34 +216,9 @@ class MonitoringService
      */
     protected function buildServerDownEmailBody(array $server): string
     {
-        return <<<HTML
-<!DOCTYPE html>
-<html>
-<head>
-    <style>
-        body { font-family: Arial, sans-serif; }
-        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .alert { background: #ef5350; color: white; padding: 20px; text-align: center; }
-        .content { padding: 20px; border: 1px solid #ddd; }
-        .detail { margin: 10px 0; padding: 10px; background: #f5f5f5; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="alert">
-            <h1>⚠️ Server Offline</h1>
-        </div>
-        <div class="content">
-            <p><strong>Server:</strong> {$server['name']}</p>
-            <p><strong>Host:</strong> {$server['host']}</p>
-            <p><strong>Port:</strong> {$server['port']}</p>
-            <p><strong>Timestamp:</strong> {$_SERVER['REQUEST_TIME']}</p>
-            <p>The server is currently unreachable. Please investigate immediately.</p>
-        </div>
-    </div>
-</body>
-</html>
-HTML;
+        ob_start();
+        require RESOURCES_PATH . '/views/emails/server_down.php';
+        return ob_get_clean();
     }
     
     /**
@@ -250,33 +229,9 @@ HTML;
      */
     protected function buildServerRecoveredEmailBody(array $server): string
     {
-        return <<<HTML
-<!DOCTYPE html>
-<html>
-<head>
-    <style>
-        body { font-family: Arial, sans-serif; }
-        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .success { background: #66bb6a; color: white; padding: 20px; text-align: center; }
-        .content { padding: 20px; border: 1px solid #ddd; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="success">
-            <h1>✓ Server Recovered</h1>
-        </div>
-        <div class="content">
-            <p><strong>Server:</strong> {$server['name']}</p>
-            <p><strong>Host:</strong> {$server['host']}</p>
-            <p><strong>Port:</strong> {$server['port']}</p>
-            <p><strong>Timestamp:</strong> {$_SERVER['REQUEST_TIME']}</p>
-            <p>The server is now online and responding normally.</p>
-        </div>
-    </div>
-</body>
-</html>
-HTML;
+        ob_start();
+        require RESOURCES_PATH . '/views/emails/server_recovered.php';
+        return ob_get_clean();
     }
     
     /**
@@ -286,7 +241,21 @@ HTML;
      */
     protected function getActiveServers(): array
     {
-        // TODO: Fetch from database when structure is ready
-        return [];
+        // Fetch from database
+        $repo = app(\App\Infrastructure\Repositories\ServerRepository::class);
+        $servers = $repo->findActive();
+        
+        $result = [];
+        foreach ($servers as $server) {
+            $result[] = [
+                'id' => $server->id,
+                'name' => $server->name,
+                'host' => $server->host,
+                'port' => $server->port,
+                'status' => $server->status
+            ];
+        }
+        
+        return $result;
     }
 }

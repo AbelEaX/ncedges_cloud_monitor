@@ -22,7 +22,7 @@ try {
     // For now, just return success (actual implementation would save to database/config)
     // Log action
     $audit = app(\App\Infrastructure\Logging\AuditService::class);
-    $audit->log('update', 'settings', $section, $auth->user()->id, "Updated $section settings", $input);
+    $audit->log('update', 'settings', null, $auth->user()->id, ['message' => "Updated $section settings", 'section' => $section, 'input' => $input], 'info');
 
     header('Content-Type: application/json');
     echo json_encode([

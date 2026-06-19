@@ -56,7 +56,7 @@ try {
 
     // Log action
     $audit = app(\App\Infrastructure\Logging\AuditService::class);
-    $audit->log('export', 'reports', null, $auth->user()->id, "Exported report as $format");
+    $audit->log('export', 'reports', null, $auth->user()->id, ['message' => "Exported report as $format"]);
 } catch (Exception $e) {
     header('HTTP/1.1 500 Internal Server Error');
     echo json_encode([

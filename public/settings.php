@@ -19,7 +19,7 @@ if (!$auth->hasPermission('settings.view')) {
 }
 
 $audit = app(\App\Infrastructure\Logging\AuditService::class);
-$audit->log('view', 'settings_page', null, $auth->user()->id, 'Viewed settings page');
+$audit->log('view', 'settings_page', null, $auth->user()->id, ['message' => 'Viewed settings page']);
 
 header('Content-Type: text/html; charset=utf-8');
 include __DIR__ . '/../resources/views/settings/index.php';

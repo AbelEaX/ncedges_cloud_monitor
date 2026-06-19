@@ -66,18 +66,18 @@ class ActivityTimelineService
         $ip_address = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
         $user_agent = $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';
         
-        // TODO: Insert into activities table
-        // $this->connection->insert('activities', [
-        //     'user_id' => $user_id,
-        //     'action' => $action,
-        //     'entity_type' => $entity_type,
-        //     'entity_id' => $entity_id,
-        //     'description' => $description,
-        //     'details' => json_encode($details),
-        //     'ip_address' => $ip_address,
-        //     'user_agent' => $user_agent,
-        //     'created_at' => $timestamp,
-        // ]);
+        // Insert into activities table
+        $this->connection->insert('activities', [
+            'user_id' => $user_id,
+            'action' => $action,
+            'entity_type' => $entity_type,
+            'entity_id' => $entity_id,
+            'description' => $description,
+            'details' => json_encode($details),
+            'ip_address' => $ip_address,
+            'user_agent' => $user_agent,
+            'created_at' => $timestamp,
+        ]);
         
         $this->logger->info(
             "Activity: {$action} on {$entity_type}",
@@ -95,13 +95,11 @@ class ActivityTimelineService
      */
     public function getRecent(int $limit = 50, int $offset = 0): array
     {
-        // TODO: Query activities table
-        // return $this->connection->fetchAll(
-        //     'SELECT * FROM activities ORDER BY created_at DESC LIMIT ? OFFSET ?',
-        //     [$limit, $offset]
-        // );
-        
-        return [];
+        // Query activities table
+        $pdo = $this->connection->getPDO();
+        $stmt = $pdo->prepare('SELECT * FROM activities ORDER BY created_at DESC LIMIT ? OFFSET ?');
+        $stmt->execute([$limit, $offset]);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
     
     /**
@@ -113,7 +111,10 @@ class ActivityTimelineService
      */
     public function getForEntity(string $entity_type, int $entity_id): array
     {
-        // TODO: Query activities table for specific entity
-        return [];
+        // Query activities table for specific entity
+        $pdo = $this->connection->getPDO();
+        $stmt = $pdo->prepare('SELECT * FROM activities WHERE entity_type = ? AND entity_id = ? ORDER BY created_at DESC');
+        $stmt->execute([$entity_type, $entity_id]);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 }

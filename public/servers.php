@@ -24,7 +24,7 @@ if (!$auth->hasPermission('server.view')) {
 
 // Log action
 $audit = app(\App\Infrastructure\Logging\AuditService::class);
-$audit->log('view', 'servers_page', null, $auth->user()->id, 'Viewed servers page');
+$audit->log('view', 'servers_page', null, $auth->user()->id, ['message' => 'Viewed servers page']);
 
 // Render view
 $servers = [];

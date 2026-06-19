@@ -4,6 +4,7 @@ namespace App\Infrastructure\Notifications;
 
 use App\Infrastructure\Mail\MailService;
 use App\Infrastructure\Logging\Logger;
+use App\Infrastructure\Database\Connection;
 
 /**
  * Notification Manager
@@ -42,17 +43,26 @@ class NotificationManager
     protected Logger $logger;
     
     /**
+     * Database connection
+     * 
+     * @var Connection
+     */
+    protected Connection $connection;
+    
+    /**
      * Constructor
      * 
      * @param array $config
      * @param MailService $mailService
      * @param Logger $logger
+     * @param Connection $connection
      */
-    public function __construct(array $config, MailService $mailService, Logger $logger)
+    public function __construct(array $config, MailService $mailService, Logger $logger, Connection $connection)
     {
         $this->config = $config;
         $this->mailService = $mailService;
         $this->logger = $logger;
+        $this->connection = $connection;
     }
     
     /**
@@ -118,10 +128,47 @@ class NotificationManager
             return false;
         }
         
-        // TODO: Implement SMS channel with Africa's Talking or similar provider
-        $this->logger->info(
-            "SMS notification queued for {$phone}",
-            ['message' => $message],
+        $username = getenv('AT_USERNAME') ?: 'sandbox';
+        $apiKey = getenv('AT_API_KEY') ?: '';
+        
+        if (empty($apiKey)) {
+            $this->logger->warning("Africa's Talking API Key is missing. SMS not sent.", [], 'notifications');
+            return false;
+        }
+        
+        $env = getenv('APP_ENV') ?: 'development';
+        $url = ($env === 'production' && $username !== 'sandbox') 
+             ? 'https://api.africastalking.com/version1/messaging' 
+             : 'https://api.sandbox.africastalking.com/version1/messaging';
+             
+        $postData = http_build_query([
+            'username' => $username,
+            'to' => $phone,
+            'message' => $message
+        ]);
+        
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Accept: application/json',
+            'Content-Type: application/x-www-form-urlencoded',
+            'apiKey: ' . $apiKey
+        ]);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        
+        if ($httpCode === 201 || $httpCode === 200) {
+            $this->logNotificationSent($phone, 'sms', 'SMS Alert');
+            return true;
+        }
+        
+        $this->logger->error(
+            "Failed to send SMS to {$phone}",
+            ['response' => $response, 'code' => $httpCode],
             'notifications'
         );
         
@@ -143,7 +190,7 @@ class NotificationManager
             return false;
         }
         
-        // TODO: Implement push notification channel
+        // Push notifications are currently not required for this implementation phase.
         return false;
     }
     
@@ -163,7 +210,18 @@ class NotificationManager
             return false;
         }
         
-        // TODO: Store in-app notification in database
+        // Store in-app notification in database
+        $this->connection->insert('notifications', [
+            'user_id' => $userId,
+            'title' => $title,
+            'message' => $message,
+            'type' => $type,
+            'data' => json_encode($data),
+            'is_read' => 0,
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s')
+        ]);
+        
         $this->logger->info(
             "In-app notification created for user {$userId}",
             ['title' => $title, 'type' => $type],
@@ -185,9 +243,16 @@ class NotificationManager
             return true;
         }
         
-        // TODO: Check notification log for recent notifications to this recipient
-        // For now, allow all
-        return true;
+        // Check notification log for recent notifications to this recipient
+        $minutes = $this->config['throttle']['minutes'] ?? 30;
+        $timeAgo = date('Y-m-d H:i:s', strtotime("-{$minutes} minutes"));
+        
+        $count = $this->connection->fetchOne(
+            'SELECT COUNT(*) as count FROM notifications WHERE user_id = ? AND created_at >= ?',
+            [$recipient, $timeAgo]
+        );
+        
+        return ($count['count'] ?? 0) === 0;
     }
     
     /**

@@ -1,0 +1,95 @@
+{
+    "data": [
+        {
+            "username": "admin",
+            "email": "admin@monitor.local",
+            "password": "$2y$12$UM99DaKvNw6280dMsliCpuajmfAKInCE9VxyneY4RMckGUxZZ2gQW",
+            "role": "admin",
+            "first_name": "System",
+            "last_name": "Administrator",
+            "created_at": "NOW(",
+            "id": 1
+        },
+        {
+            "username": "manager",
+            "email": "manager@monitor.local",
+            "password": "$2y$12$y5whM1ruRqjEUzb9prE2Ie7ik1B9SduGEJc2VgZzB5uLlm41C3Yua",
+            "role": "manager",
+            "first_name": "Manager",
+            "last_name": "User",
+            "created_at": "NOW(",
+            "id": 2
+        },
+        {
+            "username": "viewer",
+            "email": "viewer@monitor.local",
+            "password": "$2y$12$SIvZ21TyL/cAszeuGY6PMeNNjaHzTySnporCuUv7krf3Q1m6ISs/O",
+            "role": "viewer",
+            "first_name": "Viewer",
+            "last_name": "User",
+            "created_at": "NOW(",
+            "id": 3
+        },
+        {
+            "username": "admin",
+            "email": "admin@monitor.local",
+            "password": "$2y$12$KytD1/.zsW0QP/.XUM//D.4RuwwAIiSchHzyIGiyTfCUXnXL4hnvy",
+            "role": "admin",
+            "first_name": "System",
+            "last_name": "Administrator",
+            "created_at": "NOW(",
+            "id": 4
+        },
+        {
+            "username": "manager",
+            "email": "manager@monitor.local",
+            "password": "$2y$12$fHybzcg/MNXK43EFMYUl9OnY85u9fTlehI25BzQo/sNZdDu1a6uWi",
+            "role": "manager",
+            "first_name": "Manager",
+            "last_name": "User",
+            "created_at": "NOW(",
+            "id": 5
+        },
+        {
+            "username": "viewer",
+            "email": "viewer@monitor.local",
+            "password": "$2y$12$gJa2Yuyq0s4Q/MsLAgbGj.4.JH.OJN/aol.SP6T.Y6kgqR8bOnwGi",
+            "role": "viewer",
+            "first_name": "Viewer",
+            "last_name": "User",
+            "created_at": "NOW(",
+            "id": 6
+        },
+        {
+            "username": "admin",
+            "email": "admin@monitor.local",
+            "password": "$2y$12$2DV3JSppMoCk4QqfJM2s1u.AweIHj.YeTRV8wGm.77aIci7jksDjO",
+            "role": "admin",
+            "first_name": "System",
+            "last_name": "Administrator",
+            "created_at": "NOW(",
+            "id": 7
+        },
+        {
+            "username": "manager",
+            "email": "manager@monitor.local",
+            "password": "$2y$12$q2P1Hw3XIpM81oIZG.AriOvb2F.Onvj7VHbastb4YuWCuFtqwnaf.",
+            "role": "manager",
+            "first_name": "Manager",
+            "last_name": "User",
+            "created_at": "NOW(",
+            "id": 8
+        },
+        {
+            "username": "viewer",
+            "email": "viewer@monitor.local",
+            "password": "$2y$12$AM0/JZyIOIthqmeeJl8lLOAJmKWHE.xvrD8FgimJraKVLOJmuoM6.",
+            "role": "viewer",
+            "first_name": "Viewer",
+            "last_name": "User",
+            "created_at": "NOW(",
+            "id": 9
+        }
+    ],
+    "sequence": 9
+}

@@ -32,7 +32,7 @@ try {
 
     if ($result) {
         $audit = app(\App\Infrastructure\Logging\AuditService::class);
-        $audit->log('send', 'test_email', null, $auth->user()->id, "Sent test email to $to");
+        $audit->log('send', 'test_email', null, $auth->user()->id, ['message' => "Sent test email to $to"]);
 
         header('Content-Type: application/json');
         echo json_encode([

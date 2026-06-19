@@ -42,7 +42,7 @@ try {
 
     // Log action
     $audit = app(\App\Infrastructure\Logging\AuditService::class);
-    $audit->log('update', 'servers', $id, $auth->user()->id, 'Updated server', (array)$server);
+    $audit->log('update', 'servers', $id, $auth->user()->id, ['message' => 'Updated server', 'server' => (array)$server], 'info');
 
     header('Content-Type: application/json');
     echo json_encode([

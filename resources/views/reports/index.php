@@ -189,9 +189,12 @@
 <body>
     <div class="container">
         <header>
-            <div>
-                <h1>Reports & Analytics</h1>
-                <p style="color: #6b7280; margin-top: 5px;">Monitor performance and view detailed analytics</p>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <a href="/dashboard.php" style="text-decoration: none; font-size: 24px; color: #6b7280;" title="Back to Dashboard">←</a>
+                <div>
+                    <h1>Reports & Analytics</h1>
+                    <p style="color: #6b7280; margin-top: 5px;">Monitor performance and view detailed analytics</p>
+                </div>
             </div>
             <div class="filters">
                 <select id="timeRange" onchange="updateReports()">

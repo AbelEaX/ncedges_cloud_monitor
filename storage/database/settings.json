@@ -1,0 +1,110 @@
+{
+    "data": [
+        {
+            "key": "app.timezone",
+            "value": "UTC",
+            "description": "Application timezone",
+            "created_at": "NOW(",
+            "id": 1
+        },
+        {
+            "key": "app.theme",
+            "value": "light",
+            "description": "Default theme",
+            "created_at": "NOW(",
+            "id": 2
+        },
+        {
+            "key": "monitoring.enabled",
+            "value": "1",
+            "description": "Enable monitoring",
+            "created_at": "NOW(",
+            "id": 3
+        },
+        {
+            "key": "notifications.enabled",
+            "value": "1",
+            "description": "Enable notifications",
+            "created_at": "NOW(",
+            "id": 4
+        },
+        {
+            "key": "smtp.enabled",
+            "value": "1",
+            "description": "Enable SMTP",
+            "created_at": "NOW(",
+            "id": 5
+        },
+        {
+            "key": "app.timezone",
+            "value": "UTC",
+            "description": "Application timezone",
+            "created_at": "NOW(",
+            "id": 6
+        },
+        {
+            "key": "app.theme",
+            "value": "light",
+            "description": "Default theme",
+            "created_at": "NOW(",
+            "id": 7
+        },
+        {
+            "key": "monitoring.enabled",
+            "value": "1",
+            "description": "Enable monitoring",
+            "created_at": "NOW(",
+            "id": 8
+        },
+        {
+            "key": "notifications.enabled",
+            "value": "1",
+            "description": "Enable notifications",
+            "created_at": "NOW(",
+            "id": 9
+        },
+        {
+            "key": "smtp.enabled",
+            "value": "1",
+            "description": "Enable SMTP",
+            "created_at": "NOW(",
+            "id": 10
+        },
+        {
+            "key": "app.timezone",
+            "value": "UTC",
+            "description": "Application timezone",
+            "created_at": "NOW(",
+            "id": 11
+        },
+        {
+            "key": "app.theme",
+            "value": "light",
+            "description": "Default theme",
+            "created_at": "NOW(",
+            "id": 12
+        },
+        {
+            "key": "monitoring.enabled",
+            "value": "1",
+            "description": "Enable monitoring",
+            "created_at": "NOW(",
+            "id": 13
+        },
+        {
+            "key": "notifications.enabled",
+            "value": "1",
+            "description": "Enable notifications",
+            "created_at": "NOW(",
+            "id": 14
+        },
+        {
+            "key": "smtp.enabled",
+            "value": "1",
+            "description": "Enable SMTP",
+            "created_at": "NOW(",
+            "id": 15
+        }
+    ],
+    "sequence": 15
+}

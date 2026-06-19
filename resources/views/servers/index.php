@@ -144,7 +144,10 @@
 <body>
     <div class="container">
         <header>
-            <h1>Server Management</h1>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <a href="/dashboard.php" style="text-decoration: none; font-size: 24px; color: #6b7280;" title="Back to Dashboard">←</a>
+                <h1>Server Management</h1>
+            </div>
             <button class="btn btn-primary" onclick="openCreateForm()">Add New Server</button>
         </header>
 

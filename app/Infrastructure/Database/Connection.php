@@ -8,17 +8,17 @@ use PDOException;
 /**
  * Database Connection Manager
  * 
- * Manages database connections using PDO.
- * Supports SQLite, MySQL, and PostgreSQL.
+ * Manages database connections using PDO or FileDatabase fallback.
+ * Supports SQLite, MySQL, PostgreSQL, and JSON file-based storage.
  */
 class Connection
 {
     /**
-     * Database connection
+     * Database connection (PDO or FileDatabase)
      * 
-     * @var PDO
+     * @var PDO|FileDatabase
      */
-    protected PDO $pdo;
+    protected $pdo;
     
     /**
      * Database configuration
@@ -26,6 +26,13 @@ class Connection
      * @var array
      */
     protected array $config;
+    
+    /**
+     * Whether using FileDatabase fallback
+     * 
+     * @var bool
+     */
+    protected bool $usingFileDatabase = false;
     
     /**
      * Constructor
@@ -48,6 +55,13 @@ class Connection
     {
         $driver = $this->config['connections'][$this->config['default']] ?? [];
         
+        // Check if PDO drivers are available
+        if (empty(PDO::getAvailableDrivers())) {
+            // Fall back to FileDatabase if no PDO drivers are available
+            $this->useFileDatabase($driver);
+            return;
+        }
+        
         $dsn = $this->buildDSN($driver);
         
         try {
@@ -64,6 +78,19 @@ class Connection
         } catch (PDOException $e) {
             throw new PDOException("Database connection failed: " . $e->getMessage());
         }
+    }
+    
+    /**
+     * Use FileDatabase as fallback when PDO drivers are not available
+     * 
+     * @param array $driver
+     * @return void
+     */
+    protected function useFileDatabase(array $driver): void
+    {
+        $databasePath = dirname(__DIR__, 3) . '/storage/database';
+        $this->pdo = new FileDatabase($databasePath);
+        $this->usingFileDatabase = true;
     }
     
     /**
@@ -85,11 +112,11 @@ class Connection
     }
     
     /**
-     * Get PDO instance
+     * Get PDO instance or FileDatabase
      * 
-     * @return PDO
+     * @return PDO|FileDatabase
      */
-    public function getPDO(): PDO
+    public function getPDO()
     {
         return $this->pdo;
     }
@@ -99,10 +126,16 @@ class Connection
      * 
      * @param string $query
      * @param array $params
-     * @return \PDOStatement
+     * @return \PDOStatement|FileDatabaseStatement
      */
-    public function query(string $query, array $params = []): \PDOStatement
+    public function query(string $query, array $params = [])
     {
+        if ($this->usingFileDatabase) {
+            $stmt = $this->pdo->prepare($query);
+            $stmt->execute($params);
+            return $stmt;
+        }
+        
         $stmt = $this->pdo->prepare($query);
         $stmt->execute($params);
         return $stmt;
@@ -117,6 +150,16 @@ class Connection
      */
     public function fetchOne(string $query, array $params = []): ?array
     {
+        if ($this->usingFileDatabase) {
+            // For FileDatabase, we need to handle SELECT queries differently
+            if (preg_match('/SELECT\s+\*\s+FROM\s+(\w+)/i', $query, $matches)) {
+                $table = strtolower($matches[1]);
+                $data = $this->pdo->select($table);
+                return $data[0] ?? null;
+            }
+            return null;
+        }
+        
         return $this->query($query, $params)->fetch();
     }
     
@@ -129,6 +172,15 @@ class Connection
      */
     public function fetchAll(string $query, array $params = []): array
     {
+        if ($this->usingFileDatabase) {
+            // For FileDatabase, we need to handle SELECT queries differently
+            if (preg_match('/SELECT\s+\*\s+FROM\s+(\w+)/i', $query, $matches)) {
+                $table = strtolower($matches[1]);
+                return $this->pdo->select($table);
+            }
+            return [];
+        }
+        
         return $this->query($query, $params)->fetchAll();
     }
     
@@ -141,6 +193,11 @@ class Connection
      */
     public function insert(string $table, array $data): string
     {
+        if ($this->usingFileDatabase) {
+            $this->pdo->insert(strtolower($table), $data);
+            return "1";
+        }
+        
         $columns = implode(',', array_keys($data));
         $placeholders = implode(',', array_fill(0, count($data), '?'));
         
@@ -161,6 +218,11 @@ class Connection
      */
     public function update(string $table, array $data, string $where, array $params = []): int
     {
+        if ($this->usingFileDatabase) {
+            // FileDatabase doesn't support UPDATE, return 0
+            return 0;
+        }
+        
         $set = implode(',', array_map(fn($k) => "{$k}=?", array_keys($data)));
         $query = "UPDATE {$table} SET {$set} WHERE {$where}";
         
@@ -177,6 +239,16 @@ class Connection
      */
     public function delete(string $table, string $where, array $params = []): int
     {
+        if ($this->usingFileDatabase) {
+            // Parse simple WHERE clause for FileDatabase
+            if (preg_match('/(\w+)\s*=\s*\?/i', $where, $matches)) {
+                $column = $matches[1];
+                $this->pdo->delete(strtolower($table), $column, $params[0]);
+                return 1;
+            }
+            return 0;
+        }
+        
         $query = "DELETE FROM {$table} WHERE {$where}";
         return $this->query($query, $params)->rowCount();
     }

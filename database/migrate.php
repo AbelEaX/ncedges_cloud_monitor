@@ -241,9 +241,11 @@ class MigrationRunner
         require $file;
 
         // Convert filename to class name
+        // Remove date prefix (YYYY_MM_DD) and sequence number, keep only the descriptive name
+        $name = preg_replace('/^\d+_\d+_\d+_\d+_/', '', $migration);
         $className = implode('', array_map(function($part) {
             return ucfirst(strtolower($part));
-        }, preg_split('/_/', preg_replace('/^\d+_\d+_\d+_/', '', $migration))));
+        }, preg_split('/_/', $name)));
 
         $class = "Database\\Migrations\\$className";
 
