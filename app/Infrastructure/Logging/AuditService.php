@@ -309,8 +309,39 @@ class AuditService
      */
     protected function exportAsExcel(array $logs): string
     {
-        // TODO: Implement Excel export using a library like PhpSpreadsheet
-        return $this->exportAsCSV($logs);
+        if (!class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class)) {
+            // Fallback to CSV if library is not installed
+            return $this->exportAsCSV($logs);
+        }
+
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        
+        // Headers
+        $sheet->setCellValue('A1', 'ID');
+        $sheet->setCellValue('B1', 'Action');
+        $sheet->setCellValue('C1', 'Entity Type');
+        $sheet->setCellValue('D1', 'Entity ID');
+        $sheet->setCellValue('E1', 'User ID');
+        $sheet->setCellValue('F1', 'Date');
+        
+        // Data
+        $row = 2;
+        foreach ($logs as $log) {
+            $sheet->setCellValue('A' . $row, $log['id']);
+            $sheet->setCellValue('B' . $row, $log['action']);
+            $sheet->setCellValue('C' . $row, $log['entity_type']);
+            $sheet->setCellValue('D' . $row, $log['entity_id']);
+            $sheet->setCellValue('E' . $row, $log['user_id']);
+            $sheet->setCellValue('F' . $row, $log['created_at']);
+            $row++;
+        }
+        
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        
+        ob_start();
+        $writer->save('php://output');
+        return ob_get_clean();
     }
     
     /**
@@ -321,7 +352,41 @@ class AuditService
      */
     protected function exportAsPDF(array $logs): string
     {
-        // TODO: Implement PDF export using a library like TCPDF or mPDF
-        return '';
+        if (!class_exists(\TCPDF::class)) {
+            return '';
+        }
+
+        $pdf = new \TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+        $pdf->SetCreator(PDF_CREATOR);
+        $pdf->SetAuthor('Monitor System');
+        $pdf->SetTitle('Audit Logs Export');
+        
+        $pdf->setPrintHeader(false);
+        $pdf->setPrintFooter(false);
+        $pdf->AddPage();
+        
+        $html = '<h2>Audit Logs</h2>';
+        $html .= '<table border="1" cellpadding="4">';
+        $html .= '<thead><tr>';
+        $html .= '<th><b>Action</b></th>';
+        $html .= '<th><b>Entity</b></th>';
+        $html .= '<th><b>User ID</b></th>';
+        $html .= '<th><b>Date</b></th>';
+        $html .= '</tr></thead><tbody>';
+        
+        foreach ($logs as $log) {
+            $html .= '<tr>';
+            $html .= '<td>' . htmlspecialchars($log['action']) . '</td>';
+            $html .= '<td>' . htmlspecialchars($log['entity_type']) . ' (' . htmlspecialchars($log['entity_id'] ?? '') . ')</td>';
+            $html .= '<td>' . htmlspecialchars($log['user_id'] ?? '') . '</td>';
+            $html .= '<td>' . htmlspecialchars($log['created_at']) . '</td>';
+            $html .= '</tr>';
+        }
+        
+        $html .= '</tbody></table>';
+        
+        $pdf->writeHTML($html, true, false, true, false, '');
+        
+        return $pdf->Output('audit_logs.pdf', 'S');
     }
 }

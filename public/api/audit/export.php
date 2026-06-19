@@ -42,11 +42,7 @@ $auditService = app(\App\Infrastructure\Logging\AuditService::class);
 $logger = app(\App\Infrastructure\Logging\Logger::class);
 
 try {
-    // For now, return CSV by default
-    // TODO: Implement PDF and Excel exports
-    
-    $logs = $auditService->getAuditLogs(PHP_INT_MAX, 0, $filters);
-    $csv = $auditService->exportAuditLogs($format, $filters);
+    $exportData = $auditService->exportAuditLogs($format, $filters);
     
     // Log the export
     $logger->info(
@@ -56,9 +52,23 @@ try {
     );
     
     // Return the exported data
-    header('Content-Type: text/csv; charset=utf-8');
-    header("Content-Disposition: attachment; filename=\"audit-logs-{$format}.csv\"");
-    echo $csv;
+    switch ($format) {
+        case 'pdf':
+            header('Content-Type: application/pdf');
+            header("Content-Disposition: attachment; filename=\"audit-logs.pdf\"");
+            break;
+        case 'excel':
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header("Content-Disposition: attachment; filename=\"audit-logs.xlsx\"");
+            break;
+        case 'csv':
+        default:
+            header('Content-Type: text/csv; charset=utf-8');
+            header("Content-Disposition: attachment; filename=\"audit-logs.csv\"");
+            break;
+    }
+    
+    echo $exportData;
     
 } catch (\Exception $e) {
     $logger->error("Audit export error: " . $e->getMessage(), [], 'audit');
