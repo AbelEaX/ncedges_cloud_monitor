@@ -15,15 +15,38 @@ if (!$auth->isAuthenticated()) {
 }
 
 $user = $auth->user();
+$themeService = app(\App\Infrastructure\Logging\ThemeService::class);
 $audit = app(\App\Infrastructure\Logging\AuditService::class);
 $audit->log('view', 'dashboard', null, $user->getId(), ['message' => 'Viewed dashboard']);
 
-// Output the view
-// Reverting back to original file content
-$user = $auth->user();
-$audit = app(\App\Infrastructure\Logging\AuditService::class);
-$audit->log('view', 'dashboard', null, $user->getId(), ['message' => 'Viewed dashboard']);
+// Fetch servers statistics dynamically
+$totalServers = 0;
+$onlineServers = 0;
+$offlineServers = 0;
+$alertsCount = 0;
 
+try {
+    $serverRepo = app(\App\Infrastructure\Repositories\ServerRepository::class);
+    $servers = $serverRepo->findAll();
+    $totalServers = count($servers);
+    foreach ($servers as $server) {
+        if ($server->status === 'online') {
+            $onlineServers++;
+        } elseif ($server->status === 'offline') {
+            $offlineServers++;
+        }
+    }
+} catch (\Exception $e) {
+    // Fallback if repository fails
+}
+
+try {
+    $connection = app(\App\Infrastructure\Database\Connection::class);
+    $alertsCountRow = $connection->fetchOne("SELECT COUNT(*) as cnt FROM notifications");
+    $alertsCount = $alertsCountRow ? (int) $alertsCountRow['cnt'] : 0;
+} catch (\Exception $e) {
+    // Fallback
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -31,20 +54,37 @@ $audit->log('view', 'dashboard', null, $user->getId(), ['message' => 'Viewed das
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Monitor</title>
+    <?= $themeService->getStyleTag(); ?>
     <style>
+        :root {
+            --bg-color: var(--background, #f5f5f5);
+            --surface-color: var(--surface, #ffffff);
+            --border-color: var(--border, #e0e0e0);
+            --text-color: var(--text, #333333);
+            --primary-color: var(--primary, #3b82f6);
+            --success-color: var(--success, #10b981);
+            --danger-color: var(--danger, #ef4444);
+            --warning-color: var(--warning, #f59e0b);
+            --info-color: var(--info, #3b82f6);
+            --muted-color: var(--muted, #6b7280);
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: #f5f5f5;
-            color: #333;
+            font-family: var(--font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+            font-size: var(--base-size, 12px);
+            line-height: var(--line-height, 1.5);
+            background: var(--bg-color);
+            color: var(--text-color);
         }
         nav {
-            background: white;
+            background: var(--surface-color);
             padding: 0 20px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             position: sticky;
             top: 0;
             z-index: 100;
+            border-bottom: 1px solid var(--border-color);
         }
         .nav-content {
             max-width: 1200px;
@@ -57,7 +97,7 @@ $audit->log('view', 'dashboard', null, $user->getId(), ['message' => 'Viewed das
         .nav-logo {
             font-size: 20px;
             font-weight: bold;
-            color: #3b82f6;
+            color: var(--primary-color);
         }
         .nav-links {
             display: flex;
@@ -66,24 +106,25 @@ $audit->log('view', 'dashboard', null, $user->getId(), ['message' => 'Viewed das
         }
         .nav-links a {
             text-decoration: none;
-            color: #6b7280;
+            color: var(--muted-color);
             font-size: 14px;
             transition: color 0.3s ease;
         }
         .nav-links a:hover {
-            color: #3b82f6;
+            color: var(--primary-color);
         }
         .nav-user {
             display: flex;
             align-items: center;
             gap: 15px;
+            color: var(--text-color);
         }
         .user-avatar {
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background: #3b82f6;
-            color: white;
+            background: var(--primary-color);
+            color: #000000;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -92,7 +133,7 @@ $audit->log('view', 'dashboard', null, $user->getId(), ['message' => 'Viewed das
         .logout-btn {
             background: none;
             border: none;
-            color: #ef4444;
+            color: var(--danger-color);
             cursor: pointer;
             font-size: 14px;
             text-decoration: underline;
@@ -103,18 +144,20 @@ $audit->log('view', 'dashboard', null, $user->getId(), ['message' => 'Viewed das
             padding: 40px 20px;
         }
         .welcome {
-            background: white;
+            background: var(--surface-color);
             padding: 30px;
             border-radius: 8px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             margin-bottom: 40px;
+            border: 1px solid var(--border-color);
         }
         .welcome h1 {
             font-size: 32px;
             margin-bottom: 10px;
+            color: var(--text-color);
         }
         .welcome p {
-            color: #6b7280;
+            color: var(--muted-color);
             font-size: 16px;
         }
         .sections {
@@ -124,14 +167,15 @@ $audit->log('view', 'dashboard', null, $user->getId(), ['message' => 'Viewed das
             margin-bottom: 40px;
         }
         .section-card {
-            background: white;
+            background: var(--surface-color);
             padding: 30px;
             border-radius: 8px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             text-decoration: none;
             color: inherit;
             transition: all 0.3s ease;
-            border-left: 4px solid #3b82f6;
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--primary-color);
         }
         .section-card:hover {
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
@@ -143,9 +187,10 @@ $audit->log('view', 'dashboard', null, $user->getId(), ['message' => 'Viewed das
             display: flex;
             align-items: center;
             gap: 10px;
+            color: var(--text-color);
         }
         .section-card p {
-            color: #6b7280;
+            color: var(--muted-color);
             font-size: 14px;
             line-height: 1.6;
             margin-bottom: 15px;
@@ -153,7 +198,7 @@ $audit->log('view', 'dashboard', null, $user->getId(), ['message' => 'Viewed das
         .section-card ul {
             list-style: none;
             font-size: 13px;
-            color: #6b7280;
+            color: var(--muted-color);
             margin-bottom: 15px;
         }
         .section-card li {
@@ -165,13 +210,14 @@ $audit->log('view', 'dashboard', null, $user->getId(), ['message' => 'Viewed das
             content: "✓";
             position: absolute;
             left: 0;
-            color: #10b981;
+            color: var(--success-color);
         }
         .btn {
             display: inline-block;
             padding: 10px 16px;
-            background: #3b82f6;
-            color: white;
+            background: var(--primary-color);
+            color: #000000;
+            font-weight: bold;
             text-decoration: none;
             border-radius: 4px;
             font-size: 14px;
@@ -180,16 +226,18 @@ $audit->log('view', 'dashboard', null, $user->getId(), ['message' => 'Viewed das
             cursor: pointer;
         }
         .btn:hover {
-            background: #2563eb;
+            opacity: 0.9;
         }
         .dashboard-info {
-            background: white;
+            background: var(--surface-color);
             padding: 30px;
             border-radius: 8px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
         }
         .dashboard-info h2 {
             font-size: 20px;
+            color: var(--text-color);
             margin-bottom: 20px;
         }
         .info-grid {
@@ -198,21 +246,22 @@ $audit->log('view', 'dashboard', null, $user->getId(), ['message' => 'Viewed das
             gap: 20px;
         }
         .info-box {
-            background: #f9fafb;
+            background: var(--bg-color);
             padding: 20px;
             border-radius: 8px;
-            border-left: 3px solid #3b82f6;
+            border: 1px solid var(--border-color);
+            border-left: 3px solid var(--primary-color);
         }
         .info-box h3 {
             font-size: 12px;
-            color: #6b7280;
+            color: var(--muted-color);
             text-transform: uppercase;
             margin-bottom: 10px;
         }
         .info-box .value {
             font-size: 28px;
             font-weight: bold;
-            color: #1f2937;
+            color: var(--text-color);
         }
     </style>
 </head>
@@ -221,18 +270,18 @@ $audit->log('view', 'dashboard', null, $user->getId(), ['message' => 'Viewed das
         <div class="nav-content">
             <div class="nav-logo">📡 Monitor</div>
             <div class="nav-links">
-                <a href="/dashboard.php">Dashboard</a>
-                <a href="/servers.php">Servers</a>
-                <a href="/settings.php">Settings</a>
-                <a href="/reports.php">Reports</a>
+                <a href="/dashboard">Dashboard</a>
+                <a href="/servers">Servers</a>
+                <a href="/settings">Settings</a>
+                <a href="/reports">Reports</a>
             </div>
             <div class="nav-user">
                 <div class="user-avatar"><?php echo strtoupper(substr($user->getUsername() ?? 'U', 0, 1)); ?></div>
                 <div style="font-size: 14px;">
                     <div style="font-weight: 500;"><?php echo htmlspecialchars($user->getUsername() ?? 'User'); ?></div>
-                    <div style="color: #6b7280; font-size: 12px;"><?php echo ucfirst($user->getRole()); ?></div>
+                    <div style="color: var(--muted-color); font-size: 12px;"><?php echo ucfirst($user->getRole()); ?></div>
                 </div>
-                <form action="/api/auth/logout.php" method="POST" style="margin: 0;">
+                <form action="/api/auth/logout" method="POST" style="margin: 0;">
                     <button type="submit" class="logout-btn">Logout</button>
                 </form>
             </div>
@@ -288,19 +337,19 @@ $audit->log('view', 'dashboard', null, $user->getId(), ['message' => 'Viewed das
             <div class="info-grid">
                 <div class="info-box">
                     <h3>Total Servers</h3>
-                    <div class="value">0</div>
+                    <div class="value"><?php echo $totalServers; ?></div>
                 </div>
                 <div class="info-box">
                     <h3>Online</h3>
-                    <div class="value" style="color: #10b981;">0</div>
+                    <div class="value" style="color: #10b981;"><?php echo $onlineServers; ?></div>
                 </div>
                 <div class="info-box">
                     <h3>Offline</h3>
-                    <div class="value" style="color: #ef4444;">0</div>
+                    <div class="value" style="color: #ef4444;"><?php echo $offlineServers; ?></div>
                 </div>
                 <div class="info-box">
                     <h3>Alerts</h3>
-                    <div class="value" style="color: #f59e0b;">0</div>
+                    <div class="value" style="color: #f59e0b;"><?php echo $alertsCount; ?></div>
                 </div>
             </div>
         </div>

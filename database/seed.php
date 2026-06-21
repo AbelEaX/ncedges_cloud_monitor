@@ -66,7 +66,7 @@ class DatabaseSeeder
         ];
 
         $pdo = $this->connection->getPDO();
-        $stmt = $pdo->prepare('INSERT INTO roles (name, description, created_at) VALUES (?, ?, NOW())');
+        $stmt = $pdo->prepare('INSERT INTO roles (name, description, created_at) VALUES (?, ?, CURRENT_TIMESTAMP)');
 
         foreach ($roles as $role) {
             try {
@@ -107,7 +107,7 @@ class DatabaseSeeder
         ];
 
         $pdo = $this->connection->getPDO();
-        $stmt = $pdo->prepare('INSERT INTO permissions (name, description, created_at) VALUES (?, ?, NOW())');
+        $stmt = $pdo->prepare('INSERT INTO permissions (name, description, created_at) VALUES (?, ?, CURRENT_TIMESTAMP)');
 
         foreach ($permissions as $permission) {
             try {
@@ -155,7 +155,7 @@ class DatabaseSeeder
         $pdo = $this->connection->getPDO();
         $stmt = $pdo->prepare(
             'INSERT INTO users (username, email, password, role, first_name, last_name, created_at)
-             VALUES (?, ?, ?, ?, ?, ?, NOW())'
+             VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)'
         );
 
         foreach ($users as $user) {
@@ -251,7 +251,7 @@ class DatabaseSeeder
         $pdo = $this->connection->getPDO();
         $stmt = $pdo->prepare(
             'INSERT INTO settings (key, value, description, created_at)
-             VALUES (?, ?, ?, NOW())'
+             VALUES (?, ?, ?, CURRENT_TIMESTAMP)'
         );
 
         foreach ($settings as $setting) {
@@ -291,7 +291,7 @@ class DatabaseSeeder
 
         foreach ($tables as $table) {
             try {
-                $pdo->exec("TRUNCATE TABLE $table");
+                $pdo->exec("DELETE FROM $table");
                 echo "[✓] Truncated: $table\n";
             } catch (Exception $e) {
                 echo "[→] Table not found: $table\n";

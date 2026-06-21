@@ -37,7 +37,7 @@ if (!$auth->hasPermission('server.view')) {
 
 try {
     $serverRepo = app(\App\Infrastructure\Repositories\ServerRepository::class);
-    $servers = $serverRepo->all();
+    $servers = $serverRepo->findAll();
 
     // Log action
     $audit = app(\App\Infrastructure\Logging\AuditService::class);

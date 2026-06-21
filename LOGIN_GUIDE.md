@@ -34,21 +34,21 @@ php -S localhost:8000 router.php
 ### Step 2: Open Browser
 Navigate to: **http://localhost:8000/**
 
-### Step 3: Login with Demo Credentials
+### Step 3: Login with Database Credentials
 
 **Administrator Account:**
 - Username: `admin`
-- Password: `admin`
+- Password: `admin123`
 - Role: Full Access
 
 **Manager Account:**
 - Username: `manager`  
-- Password: `manager`
+- Password: `manager123`
 - Role: Management Access
 
 **Viewer Account:**
 - Username: `viewer`
-- Password: `viewer`
+- Password: `viewer123`
 - Role: Read-Only Access
 
 ---

@@ -30,7 +30,7 @@ $audit->log('view', 'servers_page', null, $auth->user()->id, ['message' => 'View
 $servers = [];
 try {
     $serverRepo = app(\App\Infrastructure\Repositories\ServerRepository::class);
-    $servers = $serverRepo->all();
+    $servers = $serverRepo->findAll();
 } catch (Exception $e) {
     // Database not available yet, use empty array
     $servers = [];
