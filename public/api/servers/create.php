@@ -18,20 +18,20 @@ if (!$auth->isAuthenticated() || !$auth->hasPermission('server.create')) {
 try {
     $input = json_decode(file_get_contents('php://input'), true);
 
-    if (!$input || !isset($input['name']) || !isset($input['hostname'])) {
-        throw new Exception('Name and hostname are required');
+    if (!$input || !isset($input['name']) || !isset($input['host'])) {
+        throw new Exception('Name and host are required');
     }
 
     $serverRepo = app(\App\Infrastructure\Repositories\ServerRepository::class);
     $server = new \App\Domain\Entities\Server(
-        null,
-        $input['name'],
-        $input['hostname'],
-        $input['ip_address'] ?? null,
-        $input['description'] ?? null,
-        $input['is_active'] ?? 1,
-        new DateTime(),
-        new DateTime()
+        id: null,
+        name: $input['name'],
+        host: $input['host'],
+        port: isset($input['port']) ? (int) $input['port'] : 443,
+        description: $input['description'] ?? null,
+        status: 'unknown',
+        group_name: $input['group_name'] ?? null,
+        is_active: isset($input['is_active']) ? (bool) $input['is_active'] : true
     );
 
     $serverId = $serverRepo->create($server);

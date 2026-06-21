@@ -2,6 +2,7 @@
 /**
  * Settings Management View
  */
+$themeService = app(\App\Infrastructure\Logging\ThemeService::class);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -9,34 +10,52 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Settings - Monitor</title>
+    <?= $themeService->getStyleTag(); ?>
     <style>
+        :root {
+            --bg-color: var(--background, #f5f5f5);
+            --surface-color: var(--surface, #ffffff);
+            --border-color: var(--border, #e0e0e0);
+            --text-color: var(--text, #333333);
+            --primary-color: var(--primary, #3b82f6);
+            --success-color: var(--success, #10b981);
+            --danger-color: var(--danger, #ef4444);
+            --warning-color: var(--warning, #f59e0b);
+            --info-color: var(--info, #3b82f6);
+            --muted-color: var(--muted, #666666);
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: #f5f5f5;
-            color: #333;
-            padding: 20px;
+            font-family: var(--font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+            font-size: var(--base-size, 12px);
+            line-height: var(--line-height, 1.5);
+            background: var(--bg-color);
+            color: var(--text-color);
+            padding: var(--container-padding, 20px);
         }
         .container { max-width: 1200px; margin: 0 auto; }
         header {
             margin-bottom: 30px;
-            background: white;
+            background: var(--surface-color);
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
         }
         h1 { font-size: 28px; }
         .content {
             display: grid;
-            grid-template-columns: 200px 1fr;
-            gap: 20px;
+            grid-template-columns: var(--sidebar-width, 180px) 1fr;
+            gap: var(--container-padding, 15px);
         }
         .sidebar {
-            background: white;
+            background: var(--surface-color);
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             height: fit-content;
+            border: 1px solid var(--border-color);
         }
         .sidebar-item {
             padding: 12px 16px;
@@ -45,22 +64,25 @@
             margin-bottom: 5px;
             border-radius: 4px;
             transition: all 0.3s ease;
+            color: var(--muted-color);
         }
         .sidebar-item:hover {
-            background: #f3f4f6;
+            background: var(--bg-color);
+            color: var(--text-color);
         }
         .sidebar-item.active {
-            background: #eff6ff;
-            border-left-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+            border-left-color: var(--primary-color);
             font-weight: 600;
-            color: #3b82f6;
+            color: var(--primary-color);
         }
         .settings-section {
-            background: white;
+            background: var(--surface-color);
             padding: 30px;
             border-radius: 8px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             display: none;
+            border: 1px solid var(--border-color);
         }
         .settings-section.active {
             display: block;
@@ -69,7 +91,7 @@
             font-size: 20px;
             margin-bottom: 20px;
             padding-bottom: 10px;
-            border-bottom: 1px solid #e5e7eb;
+            border-bottom: 1px solid var(--border-color);
         }
         .form-group {
             margin-bottom: 20px;
@@ -78,6 +100,7 @@
             display: block;
             margin-bottom: 8px;
             font-weight: 500;
+            color: var(--text-color);
         }
         input[type="text"],
         input[type="email"],
@@ -87,16 +110,30 @@
         textarea {
             width: 100%;
             padding: 10px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border-color);
             border-radius: 4px;
             font-size: 14px;
+            background: var(--bg-color);
+            color: var(--text-color);
+        }
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="number"]:focus,
+        input[type="password"]:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
         input[type="checkbox"] {
             margin-right: 8px;
+            accent-color: var(--primary-color);
         }
         .checkbox-label {
             display: flex;
             align-items: center;
+            color: var(--text-color);
         }
         .btn {
             padding: 10px 20px;
@@ -108,18 +145,19 @@
             font-weight: 500;
         }
         .btn-primary {
-            background: #3b82f6;
-            color: white;
+            background: var(--primary-color);
+            color: #000000;
+            font-weight: bold;
         }
         .btn-primary:hover {
-            background: #2563eb;
+            opacity: 0.9;
         }
         .btn-secondary {
-            background: #6b7280;
+            background: var(--muted-color);
             color: white;
         }
         .btn-secondary:hover {
-            background: #4b5563;
+            opacity: 0.9;
         }
         .alert {
             padding: 12px 16px;
@@ -152,24 +190,29 @@
         .theme-option {
             flex: 1;
             padding: 20px;
-            border: 2px solid #ddd;
+            border: 2px solid var(--border-color);
             border-radius: 8px;
             cursor: pointer;
             text-align: center;
             transition: all 0.3s ease;
+            background: var(--bg-color);
         }
         .theme-option.selected {
-            border-color: #3b82f6;
-            background: #eff6ff;
+            border-color: var(--primary-color);
+            background: rgba(59, 130, 246, 0.1);
         }
         .theme-option h3 {
             margin-bottom: 10px;
+            color: var(--text-color);
+        }
+        .theme-option p {
+            color: var(--muted-color);
         }
         .test-email-button {
             margin-top: 10px;
         }
         .divider {
-            border-top: 1px solid #e5e7eb;
+            border-top: 1px solid var(--border-color);
             margin: 30px 0;
         }
     </style>
@@ -206,30 +249,32 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="appName">Application Name</label>
-                                <input type="text" id="appName" name="app_name" value="Monitor System">
+                                <input type="text" id="appName" name="app_name" value="<?= htmlspecialchars(config('app.name', 'Monitor System')); ?>">
                             </div>
                             <div class="form-group">
                                 <label for="appUrl">Application URL</label>
-                                <input type="text" id="appUrl" name="app_url" value="http://localhost">
+                                <input type="text" id="appUrl" name="app_url" value="<?= htmlspecialchars(config('app.url', 'http://localhost')); ?>">
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="timezone">Timezone</label>
                                 <select id="timezone" name="timezone">
-                                    <option value="UTC">UTC</option>
-                                    <option value="Africa/Kampala" selected>Africa/Kampala</option>
-                                    <option value="America/New_York">America/New_York</option>
-                                    <option value="Europe/London">Europe/London</option>
-                                    <option value="Asia/Tokyo">Asia/Tokyo</option>
+                                    <?php $tz = config('app.timezone', 'Africa/Kampala'); ?>
+                                    <option value="UTC" <?= $tz === 'UTC' ? 'selected' : ''; ?>>UTC</option>
+                                    <option value="Africa/Kampala" <?= $tz === 'Africa/Kampala' ? 'selected' : ''; ?>>Africa/Kampala</option>
+                                    <option value="America/New_York" <?= $tz === 'America/New_York' ? 'selected' : ''; ?>>America/New_York</option>
+                                    <option value="Europe/London" <?= $tz === 'Europe/London' ? 'selected' : ''; ?>>Europe/London</option>
+                                    <option value="Asia/Tokyo" <?= $tz === 'Asia/Tokyo' ? 'selected' : ''; ?>>Asia/Tokyo</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label for="locale">Locale</label>
                                 <select id="locale" name="locale">
-                                    <option value="en" selected>English</option>
-                                    <option value="fr">Français</option>
-                                    <option value="es">Español</option>
+                                    <?php $loc = config('app.locale', 'en'); ?>
+                                    <option value="en" <?= $loc === 'en' ? 'selected' : ''; ?>>English</option>
+                                    <option value="fr" <?= $loc === 'fr' ? 'selected' : ''; ?>>Français</option>
+                                    <option value="es" <?= $loc === 'es' ? 'selected' : ''; ?>>Español</option>
                                 </select>
                             </div>
                         </div>
@@ -244,20 +289,21 @@
                         <div class="form-group">
                             <label>Choose Theme</label>
                             <div class="theme-options">
-                                <div class="theme-option selected" onclick="selectTheme('light', this)">
+                                <?php $theme = config('theme.default', 'dark'); ?>
+                                <div class="theme-option <?= $theme === 'light' ? 'selected' : ''; ?>" onclick="selectTheme('light', this)">
                                     <h3>☀️ Light</h3>
                                     <p>Bright and clean interface</p>
                                 </div>
-                                <div class="theme-option" onclick="selectTheme('dark', this)">
+                                <div class="theme-option <?= $theme === 'dark' ? 'selected' : ''; ?>" onclick="selectTheme('dark', this)">
                                     <h3>🌙 Dark</h3>
                                     <p>Easy on the eyes</p>
                                 </div>
                             </div>
-                            <input type="hidden" id="selectedTheme" name="theme" value="light">
+                            <input type="hidden" id="selectedTheme" name="theme" value="<?= htmlspecialchars($theme); ?>">
                         </div>
                         <div class="form-group">
                             <label class="checkbox-label">
-                                <input type="checkbox" name="user_can_change_theme" checked>
+                                <input type="checkbox" name="user_can_change_theme" <?= config('theme.user_can_change', true) ? 'checked' : ''; ?>>
                                 Allow users to change theme
                             </label>
                         </div>
@@ -271,52 +317,53 @@
                     <form onsubmit="handleSettingsSubmit(event, 'smtp')">
                         <div class="form-group">
                             <label class="checkbox-label">
-                                <input type="checkbox" id="smtpEnabled" name="enabled" checked>
+                                <input type="checkbox" id="smtpEnabled" name="enabled" <?= config('smtp.enabled', true) ? 'checked' : ''; ?>>
                                 Enable SMTP
                             </label>
                         </div>
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="smtpHost">SMTP Host</label>
-                                <input type="text" id="smtpHost" name="host" value="mail-gw.ncedges.com">
+                                <input type="text" id="smtpHost" name="host" value="<?= htmlspecialchars(config('smtp.smtp.host', 'mail-gw.ncedges.com')); ?>">
                             </div>
                             <div class="form-group">
                                 <label for="smtpPort">SMTP Port</label>
-                                <input type="number" id="smtpPort" name="port" value="465">
+                                <input type="number" id="smtpPort" name="port" value="<?= htmlspecialchars(config('smtp.smtp.port', 465)); ?>">
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="smtpUsername">Username</label>
-                                <input type="text" id="smtpUsername" name="username" value="webadmin@ncedges.com">
+                                <input type="text" id="smtpUsername" name="username" value="<?= htmlspecialchars(config('smtp.smtp.username', 'webadmin@ncedges.com')); ?>">
                             </div>
                             <div class="form-group">
                                 <label for="smtpPassword">Password</label>
-                                <input type="password" id="smtpPassword" name="password">
+                                <input type="password" id="smtpPassword" name="password" placeholder="••••••••">
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="smtpEncryption">Encryption</label>
                                 <select id="smtpEncryption" name="encryption">
-                                    <option value="tls">TLS</option>
-                                    <option value="ssl" selected>SSL</option>
-                                    <option value="none">None</option>
+                                    <?php $enc = config('smtp.smtp.encryption', 'ssl'); ?>
+                                    <option value="tls" <?= $enc === 'tls' ? 'selected' : ''; ?>>TLS</option>
+                                    <option value="ssl" <?= $enc === 'ssl' ? 'selected' : ''; ?>>SSL</option>
+                                    <option value="none" <?= $enc === 'none' ? 'selected' : ''; ?>>None</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label for="smtpTimeout">Timeout (seconds)</label>
-                                <input type="number" id="smtpTimeout" name="timeout" value="10">
+                                <input type="number" id="smtpTimeout" name="timeout" value="<?= htmlspecialchars(config('smtp.smtp.timeout', 10)); ?>">
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="smtpFromAddress">From Address</label>
-                                <input type="email" id="smtpFromAddress" name="from_address" value="webadmin@ncedges.com">
+                                <input type="email" id="smtpFromAddress" name="from_address" value="<?= htmlspecialchars(config('smtp.from.address', 'webadmin@ncedges.com')); ?>">
                             </div>
                             <div class="form-group">
                                 <label for="smtpFromName">From Name</label>
-                                <input type="text" id="smtpFromName" name="from_name" value="Monitor System">
+                                <input type="text" id="smtpFromName" name="from_name" value="<?= htmlspecialchars(config('smtp.from.name', 'Monitor System')); ?>">
                             </div>
                         </div>
                         <div class="form-row">
@@ -332,7 +379,7 @@
                     <form onsubmit="handleSettingsSubmit(event, 'notifications')">
                         <div class="form-group">
                             <label class="checkbox-label">
-                                <input type="checkbox" name="enabled" checked>
+                                <input type="checkbox" name="enabled" <?= config('notifications.enabled', true) ? 'checked' : ''; ?>>
                                 Enable Notifications
                             </label>
                         </div>
@@ -342,25 +389,25 @@
                         <h3>Notification Channels</h3>
                         <div class="form-group">
                             <label class="checkbox-label">
-                                <input type="checkbox" name="email_enabled" checked>
+                                <input type="checkbox" name="email_enabled" <?= config('notifications.channels.email.enabled', true) ? 'checked' : ''; ?>>
                                 Email Notifications
                             </label>
                         </div>
                         <div class="form-group">
                             <label class="checkbox-label">
-                                <input type="checkbox" name="sms_enabled">
+                                <input type="checkbox" name="sms_enabled" <?= config('notifications.channels.sms.enabled', false) ? 'checked' : ''; ?>>
                                 SMS Notifications
                             </label>
                         </div>
                         <div class="form-group">
                             <label class="checkbox-label">
-                                <input type="checkbox" name="push_enabled">
+                                <input type="checkbox" name="push_enabled" <?= config('notifications.channels.push.enabled', false) ? 'checked' : ''; ?>>
                                 Push Notifications
                             </label>
                         </div>
                         <div class="form-group">
                             <label class="checkbox-label">
-                                <input type="checkbox" name="in_app_enabled" checked>
+                                <input type="checkbox" name="in_app_enabled" <?= config('notifications.channels.in_app.enabled', true) ? 'checked' : ''; ?>>
                                 In-App Notifications
                             </label>
                         </div>
@@ -370,13 +417,13 @@
                         <h3>Throttling</h3>
                         <div class="form-group">
                             <label class="checkbox-label">
-                                <input type="checkbox" name="throttle_enabled" checked>
+                                <input type="checkbox" name="throttle_enabled" <?= config('notifications.throttle.enabled', true) ? 'checked' : ''; ?>>
                                 Enable Throttling (prevent notification spam)
                             </label>
                         </div>
                         <div class="form-group">
                             <label for="throttleMinutes">Throttle Duration (minutes)</label>
-                            <input type="number" id="throttleMinutes" name="throttle_minutes" value="30" min="1">
+                            <input type="number" id="throttleMinutes" name="throttle_minutes" value="<?= htmlspecialchars(config('notifications.throttle.minutes', 30)); ?>" min="1">
                         </div>
 
                         <button type="submit" class="btn btn-primary">Save Notification Settings</button>
@@ -389,7 +436,7 @@
                     <form onsubmit="handleSettingsSubmit(event, 'monitoring')">
                         <div class="form-group">
                             <label class="checkbox-label">
-                                <input type="checkbox" name="enabled" checked>
+                                <input type="checkbox" name="enabled" <?= config('monitoring.health_check.enabled', true) ? 'checked' : ''; ?>>
                                 Enable Monitoring
                             </label>
                         </div>
@@ -399,11 +446,11 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="refreshInterval">Refresh Interval (seconds)</label>
-                                <input type="number" id="refreshInterval" name="refresh_interval" value="30" min="5">
+                                <input type="number" id="refreshInterval" name="refresh_interval" value="<?= htmlspecialchars(config('monitoring.refresh.interval', 30)); ?>" min="5">
                             </div>
                             <div class="form-group">
                                 <label for="healthCheckTimeout">Health Check Timeout (seconds)</label>
-                                <input type="number" id="healthCheckTimeout" name="health_check_timeout" value="3" min="1">
+                                <input type="number" id="healthCheckTimeout" name="health_check_timeout" value="<?= htmlspecialchars(config('monitoring.health_check.timeout', 3)); ?>" min="1">
                             </div>
                         </div>
 
@@ -413,11 +460,11 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="alertAfter">Alert After (seconds)</label>
-                                <input type="number" id="alertAfter" name="alert_after_seconds" value="300" min="30">
+                                <input type="number" id="alertAfter" name="alert_after_seconds" value="<?= htmlspecialchars(config('monitoring.thresholds.alert_after_seconds', 300)); ?>" min="30">
                             </div>
                             <div class="form-group">
                                 <label for="criticalAfter">Critical After (seconds)</label>
-                                <input type="number" id="criticalAfter" name="critical_after_seconds" value="900" min="60">
+                                <input type="number" id="criticalAfter" name="critical_after_seconds" value="<?= htmlspecialchars(config('monitoring.thresholds.critical_after_seconds', 900)); ?>" min="60">
                             </div>
                         </div>
 
@@ -433,7 +480,7 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="sessionTimeout">Session Timeout (minutes)</label>
-                                <input type="number" id="sessionTimeout" name="session_timeout" value="60" min="5">
+                                <input type="number" id="sessionTimeout" name="session_timeout" value="<?= htmlspecialchars(config('security.auth.session_timeout', 3600) / 60); ?>" min="5">
                             </div>
                         </div>
 
@@ -442,23 +489,23 @@
                         <h3>Password Policy</h3>
                         <div class="form-group">
                             <label for="passwordMinLength">Minimum Password Length</label>
-                            <input type="number" id="passwordMinLength" name="password_min_length" value="8" min="6">
+                            <input type="number" id="passwordMinLength" name="password_min_length" value="<?= htmlspecialchars(config('security.password.min_length', 8)); ?>" min="6">
                         </div>
                         <div class="form-group">
                             <label class="checkbox-label">
-                                <input type="checkbox" name="password_require_uppercase" checked>
+                                <input type="checkbox" name="password_require_uppercase" <?= config('security.password.require_uppercase', true) ? 'checked' : ''; ?>>
                                 Require Uppercase Letters
                             </label>
                         </div>
                         <div class="form-group">
                             <label class="checkbox-label">
-                                <input type="checkbox" name="password_require_numbers" checked>
+                                <input type="checkbox" name="password_require_numbers" <?= config('security.password.require_numbers', true) ? 'checked' : ''; ?>>
                                 Require Numbers
                             </label>
                         </div>
                         <div class="form-group">
                             <label class="checkbox-label">
-                                <input type="checkbox" name="password_require_special" checked>
+                                <input type="checkbox" name="password_require_special" <?= config('security.password.require_special', true) ? 'checked' : ''; ?>>
                                 Require Special Characters
                             </label>
                         </div>
@@ -468,13 +515,13 @@
                         <h3>Features</h3>
                         <div class="form-group">
                             <label class="checkbox-label">
-                                <input type="checkbox" name="audit_logging_enabled" checked>
+                                <input type="checkbox" name="audit_logging_enabled" <?= config('app.features.audit_logging_enabled', true) ? 'checked' : ''; ?>>
                                 Enable Audit Logging
                             </label>
                         </div>
                         <div class="form-group">
                             <label class="checkbox-label">
-                                <input type="checkbox" name="activity_timeline_enabled" checked>
+                                <input type="checkbox" name="activity_timeline_enabled" <?= config('app.features.activity_timeline_enabled', true) ? 'checked' : ''; ?>>
                                 Enable Activity Timeline
                             </label>
                         </div>

@@ -29,3 +29,8 @@
 [2026-06-19 14:45:50] [ERROR] Failed to retrieve servers | Context: {"error":"Failed to parse time string (NOW() at position 3 ((): Unexpected character"}
 [2026-06-19 14:54:29] [ERROR] Failed to retrieve servers | Context: {"error":"Failed to parse time string (NOW() at position 3 ((): Unexpected character"}
 [2026-06-19 14:54:53] [ERROR] Failed to retrieve servers | Context: {"error":"Failed to parse time string (NOW() at position 3 ((): Unexpected character"}
+[2026-06-19 14:58:45] [ERROR] Failed to retrieve servers | Context: {"error":"Failed to parse time string (NOW() at position 3 ((): Unexpected character"}
+[2026-06-19 15:04:39] [ERROR] Failed to retrieve servers | Context: {"error":"Failed to parse time string (NOW() at position 3 ((): Unexpected character"}
+[2026-06-19 15:08:29] [ERROR] Failed to retrieve servers | Context: {"error":"Failed to parse time string (NOW() at position 3 ((): Unexpected character"}
+[2026-06-19 15:10:11] [INFO] Database seeding completed
+[2026-06-19 15:18:47] [INFO] Database seeding completed

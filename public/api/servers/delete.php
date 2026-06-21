@@ -34,7 +34,7 @@ try {
 
     // Log action
     $audit = app(\App\Infrastructure\Logging\AuditService::class);
-    $audit->log('delete', 'servers', $id, $auth->user()->id, ['message' => 'Deleted server', 'name' => $server->getName()], 'info');
+    $audit->log('delete', 'servers', $id, $auth->user()->id, ['message' => 'Deleted server', 'name' => $server->name], 'info');
 
     header('Content-Type: application/json');
     echo json_encode([

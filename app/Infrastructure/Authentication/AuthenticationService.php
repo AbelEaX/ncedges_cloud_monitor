@@ -184,4 +184,31 @@ class AuthenticationService
         session_destroy();
         $this->user = null;
     }
+    
+    /**
+     * Generate and retrieve CSRF token
+     * 
+     * @return string
+     */
+    public function generateCsrfToken(): string
+    {
+        if (empty($_SESSION['csrf_token'])) {
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        }
+        return $_SESSION['csrf_token'];
+    }
+    
+    /**
+     * Validate CSRF token
+     * 
+     * @param string $token
+     * @return bool
+     */
+    public function validateCsrfToken(?string $token): bool
+    {
+        if (empty($_SESSION['csrf_token']) || empty($token)) {
+            return false;
+        }
+        return hash_equals($_SESSION['csrf_token'], $token);
+    }
 }

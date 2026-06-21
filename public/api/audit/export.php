@@ -4,7 +4,7 @@
  * 
  * Exports audit logs in requested format (CSV, PDF, Excel)
  */
-require __DIR__ . '/../../bootstrap/app.php';
+require dirname(__DIR__, 3) . '/bootstrap/app.php';
 
 use App\Presentation\Responses\ApiResponse;
 use App\Presentation\Middleware\AuthenticationMiddleware;

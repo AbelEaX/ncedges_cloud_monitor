@@ -27,13 +27,17 @@ $audit = app(\App\Infrastructure\Logging\AuditService::class);
 $audit->log('view', 'servers_page', null, $auth->user()->id, ['message' => 'Viewed servers page']);
 
 // Render view
-$servers = [];
+$servers = [
+
+];
 try {
     $serverRepo = app(\App\Infrastructure\Repositories\ServerRepository::class);
     $servers = $serverRepo->findAll();
 } catch (Exception $e) {
     // Database not available yet, use empty array
-    $servers = [];
+    $servers = [
+        
+    ];
 }
 
 // Output the view

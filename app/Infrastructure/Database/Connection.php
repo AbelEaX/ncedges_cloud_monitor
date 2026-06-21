@@ -160,7 +160,8 @@ class Connection
             return null;
         }
         
-        return $this->query($query, $params)->fetch();
+        $result = $this->query($query, $params)->fetch();
+        return $result === false ? null : $result;
     }
     
     /**

@@ -7,7 +7,7 @@ namespace App\Domain\Entities;
  * 
  * Represents a server in the monitoring system.
  */
-class Server
+class Server implements \JsonSerializable
 {
     public function __construct(
         public ?int $id = null,
@@ -24,6 +24,28 @@ class Server
         public ?\DateTime $created_at = null,
         public ?\DateTime $updated_at = null,
     ) {}
+
+    /**
+     * Specify data which should be serialized to JSON
+     */
+    public function jsonSerialize(): array
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'host' => $this->host,
+            'port' => $this->port,
+            'description' => $this->description,
+            'status' => $this->status,
+            'group_name' => $this->group_name,
+            'is_active' => $this->is_active,
+            'last_check_at' => $this->last_check_at?->format(\DateTimeInterface::ATOM),
+            'last_status_change_at' => $this->last_status_change_at?->format(\DateTimeInterface::ATOM),
+            'alert_sent' => $this->alert_sent,
+            'created_at' => $this->created_at?->format(\DateTimeInterface::ATOM),
+            'updated_at' => $this->updated_at?->format(\DateTimeInterface::ATOM),
+        ];
+    }
     
     /**
      * Check if server is online

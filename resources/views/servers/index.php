@@ -4,6 +4,7 @@
  * @var \App\Infrastructure\Authentication\AuthenticationService $auth
  * @var \App\Infrastructure\Logging\Logger $logger
  */
+$themeService = app(\App\Infrastructure\Logging\ThemeService::class);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -11,13 +12,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Server Management - Monitor</title>
+    <?= $themeService->getStyleTag(); ?>
     <style>
+        :root {
+            --bg-color: var(--background, #f5f5f5);
+            --surface-color: var(--surface, #ffffff);
+            --border-color: var(--border, #e0e0e0);
+            --text-color: var(--text, #333333);
+            --primary-color: var(--primary, #3b82f6);
+            --success-color: var(--success, #10b981);
+            --danger-color: var(--danger, #ef4444);
+            --warning-color: var(--warning, #f59e0b);
+            --info-color: var(--info, #3b82f6);
+            --muted-color: var(--muted, #6b7280);
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: #f5f5f5;
-            color: #333;
-            padding: 20px;
+            font-family: var(--font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+            font-size: var(--base-size, 12px);
+            line-height: var(--line-height, 1.5);
+            background: var(--bg-color);
+            color: var(--text-color);
+            padding: var(--container-padding, 20px);
         }
         .container { max-width: 1200px; margin: 0 auto; }
         header {
@@ -25,10 +42,11 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 30px;
-            background: white;
+            background: var(--surface-color);
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
         }
         h1 { font-size: 28px; }
         .btn {
@@ -40,53 +58,58 @@
             text-decoration: none;
             display: inline-block;
             transition: all 0.3s ease;
+            font-weight: 500;
         }
         .btn-primary {
-            background: #3b82f6;
-            color: white;
+            background: var(--primary-color);
+            color: #000000;
+            font-weight: bold;
         }
         .btn-primary:hover {
-            background: #2563eb;
+            opacity: 0.9;
         }
         .btn-secondary {
-            background: #6b7280;
+            background: var(--muted-color);
             color: white;
             padding: 6px 12px;
             font-size: 13px;
         }
         .btn-secondary:hover {
-            background: #4b5563;
+            opacity: 0.9;
         }
         .btn-danger {
-            background: #ef4444;
+            background: var(--danger-color);
             color: white;
             padding: 6px 12px;
             font-size: 13px;
         }
         .btn-danger:hover {
-            background: #dc2626;
+            opacity: 0.9;
         }
         .table {
             width: 100%;
-            background: white;
+            background: var(--surface-color);
             border-collapse: collapse;
             border-radius: 8px;
             overflow: hidden;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
         }
         .table th {
-            background: #f3f4f6;
+            background: var(--bg-color);
             padding: 15px;
             text-align: left;
             font-weight: 600;
-            border-bottom: 1px solid #e5e7eb;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-color);
         }
         .table td {
             padding: 15px;
-            border-bottom: 1px solid #e5e7eb;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-color);
         }
         .table tr:hover {
-            background: #f9fafb;
+            background: rgba(255, 255, 255, 0.02);
         }
         .status-badge {
             display: inline-block;
@@ -96,12 +119,12 @@
             font-weight: 600;
         }
         .status-online {
-            background: #d1fae5;
-            color: #065f46;
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success-color);
         }
         .status-offline {
-            background: #fee2e2;
-            color: #7f1d1d;
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--danger-color);
         }
         .actions {
             display: flex;
@@ -110,15 +133,16 @@
         .empty-state {
             text-align: center;
             padding: 60px 20px;
-            background: white;
+            background: var(--surface-color);
             border-radius: 8px;
+            border: 1px solid var(--border-color);
         }
         .empty-state h2 {
-            color: #6b7280;
+            color: var(--muted-color);
             margin-bottom: 10px;
         }
         .empty-state p {
-            color: #9ca3af;
+            color: var(--muted-color);
             margin-bottom: 20px;
         }
         .alert {
@@ -138,6 +162,25 @@
             color: #7f1d1d;
             border: 1px solid #fca5a5;
             display: block;
+        }
+        .modal-content {
+            background: var(--surface-color);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+        .form-input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            margin-top: 5px;
+            background: var(--bg-color);
+            color: var(--text-color);
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
     </style>
 </head>
@@ -162,34 +205,34 @@
     </div>
 
     <!-- Modal for Create/Edit -->
-    <div id="serverModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
-        <div style="background: white; width: 90%; max-width: 500px; margin: 50px auto; padding: 30px; border-radius: 8px;">
-            <h2 id="modalTitle">Add New Server</h2>
+    <div id="serverModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000;">
+        <div class="modal-content" style="width: 90%; max-width: 500px; margin: 50px auto; padding: 30px; border-radius: 8px;">
+            <h2 id="modalTitle" style="margin-bottom: 20px;">Add New Server</h2>
             <form id="serverForm" onsubmit="handleSubmit(event)">
                 <input type="hidden" id="serverId">
 
                 <div style="margin-bottom: 15px;">
                     <label for="serverName">Server Name *</label>
-                    <input type="text" id="serverName" name="name" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin-top: 5px;">
+                    <input type="text" id="serverName" name="name" required class="form-input">
                 </div>
 
                 <div style="margin-bottom: 15px;">
-                    <label for="serverHostname">Hostname *</label>
-                    <input type="text" id="serverHostname" name="hostname" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin-top: 5px;">
+                    <label for="serverHost">Host / IP Address *</label>
+                    <input type="text" id="serverHost" name="host" required class="form-input">
                 </div>
 
                 <div style="margin-bottom: 15px;">
-                    <label for="serverIp">IP Address</label>
-                    <input type="text" id="serverIp" name="ip_address" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin-top: 5px;">
+                    <label for="serverPort">Port *</label>
+                    <input type="number" id="serverPort" name="port" required value="443" class="form-input">
                 </div>
 
                 <div style="margin-bottom: 15px;">
                     <label for="serverDescription">Description</label>
-                    <textarea id="serverDescription" name="description" rows="4" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin-top: 5px;"></textarea>
+                    <textarea id="serverDescription" name="description" rows="4" class="form-input"></textarea>
                 </div>
 
                 <div style="margin-bottom: 20px;">
-                    <label for="serverActive">
+                    <label for="serverActive" class="checkbox-label">
                         <input type="checkbox" id="serverActive" name="is_active" checked>
                         Active
                     </label>
@@ -242,8 +285,8 @@
                     <thead>
                         <tr>
                             <th>Server Name</th>
-                            <th>Hostname</th>
-                            <th>IP Address</th>
+                            <th>Host / IP Address</th>
+                            <th>Port</th>
                             <th>Status</th>
                             <th>Created</th>
                             <th>Actions</th>
@@ -260,8 +303,8 @@
                 html += `
                     <tr>
                         <td><strong>${server.name}</strong></td>
-                        <td>${server.hostname}</td>
-                        <td>${server.ip_address || '-'}</td>
+                        <td>${server.host}</td>
+                        <td>${server.port || '443'}</td>
                         <td><span class="status-badge status-${status}">${statusText}</span></td>
                         <td>${created}</td>
                         <td>
@@ -298,8 +341,8 @@
                         document.getElementById('modalTitle').textContent = 'Edit Server';
                         document.getElementById('serverId').value = server.id;
                         document.getElementById('serverName').value = server.name;
-                        document.getElementById('serverHostname').value = server.hostname;
-                        document.getElementById('serverIp').value = server.ip_address || '';
+                        document.getElementById('serverHost').value = server.host;
+                        document.getElementById('serverPort').value = server.port || 443;
                         document.getElementById('serverDescription').value = server.description || '';
                         document.getElementById('serverActive').checked = server.is_active;
                         document.getElementById('serverModal').style.display = 'block';

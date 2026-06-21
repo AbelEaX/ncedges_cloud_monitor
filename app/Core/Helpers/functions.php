@@ -40,6 +40,8 @@ if (!function_exists('config')) {
      */
     function config(string $key, $default = null) {
         static $configs = [];
+        static $dbSettings = null;
+        static $loadingDb = false;
 
         [$file, $setting] = array_pad(explode('.', $key, 2), 2, null);
 
@@ -60,12 +62,76 @@ if (!function_exists('config')) {
             }
         }
 
+        // Load database settings to override PHP configuration if applicable
+        if ($dbSettings === null && !$loadingDb && $file !== 'database' && function_exists('app')) {
+            $loadingDb = true;
+            try {
+                $container = app();
+                if ($container && $container->bound(\App\Infrastructure\Database\Connection::class)) {
+                    $connection = $container->resolve(\App\Infrastructure\Database\Connection::class);
+                    // Check if settings table exists to avoid crash during migrations
+                    $tableExists = $connection->fetchOne(
+                        "SELECT name FROM sqlite_master WHERE type='table' AND name='settings'"
+                    );
+                    if ($tableExists) {
+                        $rows = $connection->fetchAll('SELECT key, value, type FROM settings');
+                        $dbSettings = [];
+                        foreach ($rows as $row) {
+                            $value = $row['value'];
+                            $type = $row['type'];
+                            $dbSettings[$row['key']] = match ($type) {
+                                'integer', 'int' => (int) $value,
+                                'boolean', 'bool' => filter_var($value, FILTER_VALIDATE_BOOLEAN),
+                                'float', 'double' => (float) $value,
+                                default => $value,
+                            };
+                        }
+                    }
+                }
+            } catch (\Exception $e) {
+                // Ignore errors if database/connection is not fully initialized yet
+            }
+            $loadingDb = false;
+        }
+
+        // Merge database settings into configurations if loaded
+        if ($dbSettings !== null) {
+            foreach ($dbSettings as $dbKey => $dbValue) {
+                [$dbFile, $dbSettingKey] = array_pad(explode('.', $dbKey, 2), 2, null);
+                if ($dbSettingKey !== null && isset($configs[$dbFile])) {
+                    $keys = explode('.', $dbSettingKey);
+                    $temp = &$configs[$dbFile];
+                    foreach ($keys as $i => $nestedKey) {
+                        if ($i === count($keys) - 1) {
+                            $temp[$nestedKey] = $dbValue;
+                        } else {
+                            if (!isset($temp[$nestedKey]) || !is_array($temp[$nestedKey])) {
+                                $temp[$nestedKey] = [];
+                            }
+                            $temp = &$temp[$nestedKey];
+                        }
+                    }
+                }
+            }
+        }
+
         // Return full config or specific setting
         if ($setting === null) {
             return $configs[$file] ?? $default;
         }
 
-        return $configs[$file][$setting] ?? $default;
+        // Return nested array key if requested (e.g., 'smtp.smtp.host')
+        $keys = explode('.', $setting);
+        $value = $configs[$file];
+        foreach ($keys as $k) {
+            if (is_array($value) && isset($value[$k])) {
+                $value = $value[$k];
+            } else {
+                return $default;
+            }
+        }
+
+        return $value;
     }
 }
 

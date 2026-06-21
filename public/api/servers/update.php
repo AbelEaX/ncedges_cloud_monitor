@@ -32,11 +32,24 @@ try {
     }
 
     // Update fields
-    $server->setName($input['name'] ?? $server->getName());
-    $server->setHostname($input['hostname'] ?? $server->getHostname());
-    $server->setIpAddress($input['ip_address'] ?? $server->getIpAddress());
-    $server->setDescription($input['description'] ?? $server->getDescription());
-    $server->setIsActive($input['is_active'] ?? $server->isActive());
+    if (isset($input['name'])) {
+        $server->name = $input['name'];
+    }
+    if (isset($input['host'])) {
+        $server->host = $input['host'];
+    }
+    if (isset($input['port'])) {
+        $server->port = (int) $input['port'];
+    }
+    if (isset($input['description'])) {
+        $server->description = $input['description'];
+    }
+    if (isset($input['is_active'])) {
+        $server->is_active = (bool) $input['is_active'];
+    }
+    if (isset($input['group_name'])) {
+        $server->group_name = $input['group_name'];
+    }
 
     $serverRepo->update($server);
 

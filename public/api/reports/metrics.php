@@ -18,13 +18,41 @@ if (!$auth->isAuthenticated() || !$auth->hasPermission('reports.view')) {
 try {
     $range = $_GET['range'] ?? '7d';
 
-    // Get metrics data
+    // Get metrics data dynamically
+    $total = 0;
+    $online = 0;
+    $offline = 0;
+    $alertsCount = 0;
+
+    try {
+        $serverRepo = app(\App\Infrastructure\Repositories\ServerRepository::class);
+        $servers = $serverRepo->findAll();
+        $total = count($servers);
+        foreach ($servers as $s) {
+            if ($s->status === 'online') {
+                $online++;
+            } elseif ($s->status === 'offline') {
+                $offline++;
+            }
+        }
+    } catch (Exception $e) {
+        // Fallback
+    }
+
+    try {
+        $connection = app(\App\Infrastructure\Database\Connection::class);
+        $alertsCountRow = $connection->fetchOne("SELECT COUNT(*) as cnt FROM notifications");
+        $alertsCount = $alertsCountRow ? (int) $alertsCountRow['cnt'] : 0;
+    } catch (Exception $e) {
+        // Fallback
+    }
+
     $metrics = [
-        'total_servers' => 4,
-        'online_servers' => 4,
-        'offline_servers' => 0,
-        'avg_uptime' => 99.95,
-        'alert_count' => 2,
+        'total_servers' => $total,
+        'online_servers' => $online,
+        'offline_servers' => $offline,
+        'avg_uptime' => $total > 0 ? 100.0 : 0.0,
+        'alert_count' => $alertsCount,
     ];
 
     // Log action

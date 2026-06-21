@@ -160,6 +160,16 @@ function registerCoreServices(\App\Core\Services\Container $container): void
             return new \App\Infrastructure\Logging\ThemeService(config('theme'));
         }
     );
+
+    // Settings Repository
+    $container->singleton(
+        \App\Infrastructure\Repositories\SettingsRepository::class,
+        function ($c) {
+            return new \App\Infrastructure\Repositories\SettingsRepository(
+                $c->resolve(\App\Infrastructure\Database\Connection::class)
+            );
+        }
+    );
 }
 
 // Set timezone
@@ -167,6 +177,11 @@ date_default_timezone_set(config('app.timezone'));
 
 // Start session if not already started
 if (session_status() === PHP_SESSION_NONE && !defined('PHPUNIT_TESTSUITE')) {
+    session_set_cookie_params([
+        'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on',
+        'httponly' => true,
+        'samesite' => 'Lax'
+    ]);
     session_start();
 }
 

@@ -23,8 +23,32 @@ if (empty($username) || empty($password)) {
 
 $auth = app(\App\Infrastructure\Authentication\AuthenticationService::class);
 
+// Validate CSRF Token
+$csrfToken = $_POST['csrf_token'] ?? '';
+if (!$auth->validateCsrfToken($csrfToken)) {
+    $accept = $_SERVER['HTTP_ACCEPT'] ?? '';
+    $requestedWith = $_SERVER['HTTP_X_REQUESTED_WITH'] ?? '';
+    $isJson = strpos($accept, 'application/json') !== false || strtolower($requestedWith) === 'xmlhttprequest';
+
+    if ($isJson) {
+        ApiResponse::error('Invalid CSRF token', [], 403);
+    } else {
+        header('Location: /login?error=' . urlencode('Invalid or expired session. Please try again.'));
+        exit;
+    }
+}
+
 if (!$auth->authenticate($username, $password)) {
-    ApiResponse::error('Invalid credentials', [], 401);
+    $accept = $_SERVER['HTTP_ACCEPT'] ?? '';
+    $requestedWith = $_SERVER['HTTP_X_REQUESTED_WITH'] ?? '';
+    $isJson = strpos($accept, 'application/json') !== false || strtolower($requestedWith) === 'xmlhttprequest';
+
+    if ($isJson) {
+        ApiResponse::error('Invalid credentials', [], 401);
+    } else {
+        header('Location: /login?error=' . urlencode('Invalid credentials'));
+        exit;
+    }
 }
 
 // Log the login

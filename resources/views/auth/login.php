@@ -183,6 +183,7 @@ $error = $_GET['error'] ?? '';
         <?php endif; ?>
         
         <form method="POST" action="/api/auth/login">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(app(\App\Infrastructure\Authentication\AuthenticationService::class)->generateCsrfToken()); ?>">
             <div class="form-group">
                 <label for="username">Username</label>
                 <input 
