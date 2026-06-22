@@ -2,31 +2,45 @@
 /**
  * Reports and Analytics View
  */
+$themeService = app(\App\Infrastructure\Logging\ThemeService::class);
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="<?= htmlspecialchars($themeService->getCurrentTheme()); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reports & Analytics - Monitor</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <?= $themeService->getStyleTag(); ?>
     <style>
+        :root {
+            --bg-color: var(--background, #f5f5f5);
+            --surface-color: var(--surface, #ffffff);
+            --border-color: var(--border, #e0e0e0);
+            --text-color: var(--text, #333333);
+            --primary-color: var(--primary, #3b82f6);
+            --success-color: var(--success, #10b981);
+            --danger-color: var(--danger, #ef4444);
+            --warning-color: var(--warning, #f59e0b);
+            --info-color: var(--info, #3b82f6);
+            --muted-color: var(--muted, #6b7280);
+        }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: #f5f5f5;
-            color: #333;
-            padding: 20px;
+            font-family: var(--font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif);
+            background: var(--bg-color);
+            color: var(--text-color);
         }
-        .container { max-width: 1200px; margin: 0 auto; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
         header {
             margin-bottom: 30px;
-            background: white;
-            padding: 20px;
+            background: var(--surface-color);
+            padding: 24px;
             border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border: 1px solid var(--border-color);
         }
         h1 { font-size: 28px; }
         .filters {
@@ -40,26 +54,29 @@
             cursor: pointer;
             font-size: 14px;
             transition: all 0.3s ease;
+            font-weight: bold;
         }
         .btn-primary {
-            background: #3b82f6;
-            color: white;
+            background: var(--primary-color);
+            color: #000000;
         }
         .btn-primary:hover {
-            background: #2563eb;
+            opacity: 0.9;
         }
         .btn-secondary {
-            background: #e5e7eb;
-            color: #333;
+            background: var(--muted-color);
+            color: white;
         }
         .btn-secondary:hover {
-            background: #d1d5db;
+            opacity: 0.9;
         }
         select {
             padding: 8px 12px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border-color);
             border-radius: 4px;
             font-size: 14px;
+            background: var(--bg-color);
+            color: var(--text-color);
         }
         .grid {
             display: grid;
@@ -68,21 +85,21 @@
             margin-bottom: 30px;
         }
         .card {
-            background: white;
-            padding: 20px;
+            background: var(--surface-color);
+            padding: 24px;
             border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
         }
         .card h3 {
             font-size: 12px;
-            color: #6b7280;
+            color: var(--muted-color);
             text-transform: uppercase;
             margin-bottom: 10px;
         }
         .card-value {
             font-size: 32px;
             font-weight: bold;
-            color: #1f2937;
+            color: var(--text-color);
             margin-bottom: 5px;
         }
         .card-change {
@@ -95,57 +112,59 @@
             color: #ef4444;
         }
         .chart-container {
-            background: white;
-            padding: 20px;
+            background: var(--surface-color);
+            padding: 24px;
             border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             margin-bottom: 30px;
+            border: 1px solid var(--border-color);
         }
         .chart-container h2 {
             font-size: 18px;
             margin-bottom: 20px;
             padding-bottom: 10px;
-            border-bottom: 1px solid #e5e7eb;
+            border-bottom: 1px solid var(--border-color);
         }
         .chart-placeholder {
-            background: #f9fafb;
-            border: 2px dashed #d1d5db;
+            background: var(--bg-color);
+            border: 2px dashed var(--border-color);
             border-radius: 4px;
             padding: 40px;
             text-align: center;
-            color: #6b7280;
+            color: var(--muted-color);
         }
         .table-section {
-            background: white;
-            padding: 20px;
+            background: var(--surface-color);
+            padding: 24px;
             border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             margin-bottom: 30px;
+            border: 1px solid var(--border-color);
         }
         .table-section h2 {
             font-size: 18px;
             margin-bottom: 20px;
             padding-bottom: 10px;
-            border-bottom: 1px solid #e5e7eb;
+            border-bottom: 1px solid var(--border-color);
         }
         table {
             width: 100%;
             border-collapse: collapse;
         }
         th {
-            background: #f3f4f6;
+            background: var(--bg-color);
             padding: 12px;
             text-align: left;
             font-weight: 600;
-            border-bottom: 1px solid #e5e7eb;
+            border-bottom: 1px solid var(--border-color);
             font-size: 13px;
+            color: var(--text-color);
         }
         td {
             padding: 12px;
-            border-bottom: 1px solid #e5e7eb;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-color);
         }
-        tr:hover {
-            background: #f9fafb;
+        tr:hover td {
+            background: rgba(100, 100, 100, 0.05);
         }
         .badge {
             display: inline-block;
@@ -182,18 +201,23 @@
         .empty-state {
             text-align: center;
             padding: 40px;
-            color: #6b7280;
+            color: var(--muted-color);
         }
+        .theme-toggle-btn { background: none; border: none; cursor: pointer; font-size: 18px; color: var(--text-color); margin-right: 15px; }
+        [data-theme="dark"] .light-icon { display: inline !important; }
+        [data-theme="dark"] .dark-icon { display: none !important; }
+        [data-theme="light"] .dark-icon { display: inline !important; }
+        [data-theme="light"] .light-icon { display: none !important; }
     </style>
 </head>
 <body>
+    <?= component('nav', ['user' => $user ?? null]) ?>
     <div class="container">
         <header>
             <div style="display: flex; align-items: center; gap: 15px;">
-                <a href="/dashboard.php" style="text-decoration: none; font-size: 24px; color: #6b7280;" title="Back to Dashboard">←</a>
                 <div>
                     <h1>Reports & Analytics</h1>
-                    <p style="color: #6b7280; margin-top: 5px;">Monitor performance and view detailed analytics</p>
+                    <p style="color: var(--muted-color); margin-top: 5px;">Monitor performance and view detailed analytics</p>
                 </div>
             </div>
             <div class="filters">
@@ -330,8 +354,50 @@
                 if (uptime.success) displayUptime(uptime.data);
                 if (alerts.success) displayAlerts(alerts.data);
                 if (activity.success) displayActivity(activity.data);
+                
+                if (metrics.success) renderChart(metrics.data);
             })
             .catch(error => console.error('Error loading reports:', error));
+        }
+        
+        let statusChartInstance = null;
+        
+        function renderChart(metrics) {
+            const container = document.getElementById('statusChart');
+            if (!document.getElementById('statusChartCanvas')) {
+                container.innerHTML = '<canvas id="statusChartCanvas" style="max-height: 300px; width: 100%;"></canvas>';
+            }
+            const ctx = document.getElementById('statusChartCanvas').getContext('2d');
+            
+            if (statusChartInstance) {
+                statusChartInstance.destroy();
+            }
+            
+            const html = document.documentElement;
+            const isDark = html.getAttribute('data-theme') === 'dark';
+            const textColor = isDark ? '#e0e0e0' : '#333333';
+            
+            statusChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Online', 'Offline'],
+                    datasets: [{
+                        data: [metrics.online_servers, metrics.offline_servers],
+                        backgroundColor: ['#10b981', '#ef4444'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { 
+                            position: 'bottom',
+                            labels: { color: textColor }
+                        }
+                    }
+                }
+            });
         }
 
         function displayMetrics(data) {
@@ -372,9 +438,32 @@
                         </div>
                         ${row.uptime_30d.toFixed(2)}%
                     </td>
-                    <td><span class="badge badge-success">Online</span></td>
+                    <td><span class="badge badge-${row.current_status === 'online' ? 'success' : 'error'}">${row.current_status === 'online' ? 'Online' : 'Offline'}</span></td>
                 </tr>
             `).join('');
+        }
+
+        function timeAgo(dateParam) {
+            if (!dateParam) return '';
+            const date = new Date(dateParam);
+            const today = new Date();
+            const seconds = Math.round((today - date) / 1000);
+            const minutes = Math.round(seconds / 60);
+            const hours = Math.round(minutes / 60);
+            
+            const isToday = today.toDateString() === date.toDateString();
+            const isYesterday = new Date(today - 86400000).toDateString() === date.toDateString();
+            
+            const timeStr = date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            if (seconds < 5) return 'Just now';
+            if (seconds < 60) return `${seconds} seconds ago`;
+            if (seconds < 90) return 'A minute ago';
+            if (minutes < 60) return `${minutes} minutes ago`;
+            if (hours < 4) return `${hours} hours ago`;
+            if (isToday) return `Today at ${timeStr}`;
+            if (isYesterday) return `Yesterday at ${timeStr}`;
+            return `${date.toLocaleDateString([], {month: 'short', day: 'numeric'})} at ${timeStr}`;
         }
 
         function displayAlerts(data) {
@@ -388,7 +477,7 @@
                 const badgeClass = row.severity === 'critical' ? 'error' : 'warning';
                 return `
                     <tr>
-                        <td>${new Date(row.created_at).toLocaleString()}</td>
+                        <td>${timeAgo(row.created_at)}</td>
                         <td>${row.server_name}</td>
                         <td>${row.alert_type}</td>
                         <td>${row.message}</td>
@@ -407,7 +496,7 @@
 
             tbody.innerHTML = data.slice(0, 10).map(row => `
                 <tr>
-                    <td>${new Date(row.created_at).toLocaleString()}</td>
+                    <td>${timeAgo(row.created_at)}</td>
                     <td>${row.user_name}</td>
                     <td>${row.action}</td>
                     <td>${row.details}</td>
@@ -418,6 +507,17 @@
         function exportReport(format) {
             const timeRange = document.getElementById('timeRange').value;
             window.location.href = `/api/reports/export.php?format=${format}&range=${timeRange}`;
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            document.cookie = "theme=" + newTheme + "; path=/; max-age=31536000";
+            
+            // Re-render chart to update colors based on the new theme
+            updateReports();
         }
     </script>
 </body>

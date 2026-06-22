@@ -18,38 +18,93 @@ try {
     $format = $_GET['format'] ?? 'csv';
     $range = $_GET['range'] ?? '7d';
 
+    // Fetch actual server metrics data from Database
+    $connection = app(\App\Infrastructure\Database\Connection::class);
+    $sql = "
+    SELECT 
+        s.name as server_name,
+        s.status as current_status,
+        (SUM(CASE WHEN sm.status = 'online' AND sm.checked_at >= datetime('now', '-1 day') THEN 1 ELSE 0 END) * 100.0 / NULLIF(COUNT(CASE WHEN sm.checked_at >= datetime('now', '-1 day') THEN 1 END), 0)) as uptime_24h,
+        (SUM(CASE WHEN sm.status = 'online' AND sm.checked_at >= datetime('now', '-7 days') THEN 1 ELSE 0 END) * 100.0 / NULLIF(COUNT(CASE WHEN sm.checked_at >= datetime('now', '-7 days') THEN 1 END), 0)) as uptime_7d,
+        (SUM(CASE WHEN sm.status = 'online' AND sm.checked_at >= datetime('now', '-30 days') THEN 1 ELSE 0 END) * 100.0 / NULLIF(COUNT(CASE WHEN sm.checked_at >= datetime('now', '-30 days') THEN 1 END), 0)) as uptime_30d
+    FROM servers s
+    LEFT JOIN server_metrics sm ON s.id = sm.server_id
+    GROUP BY s.id, s.name, s.status
+    ORDER BY s.name ASC
+    ";
+    
+    $uptime = $connection->fetchAll($sql);
+    
+    $data = [];
+    foreach ($uptime as $row) {
+        $data[] = [
+            $row['server_name'],
+            $row['uptime_24h'] !== null ? number_format((float)$row['uptime_24h'], 2) . '%' : '100.00%',
+            $row['uptime_7d'] !== null ? number_format((float)$row['uptime_7d'], 2) . '%' : '100.00%',
+            $row['uptime_30d'] !== null ? number_format((float)$row['uptime_30d'], 2) . '%' : '100.00%',
+            ucfirst($row['current_status'])
+        ];
+    }
+
     if ($format === 'csv') {
         // Export as CSV
         header('Content-Type: text/csv');
         header('Content-Disposition: attachment; filename="report-' . date('Y-m-d') . '.csv"');
 
         $output = fopen('php://output', 'w');
-
-        // Write headers
         fputcsv($output, ['Server', 'Uptime 24h', 'Uptime 7d', 'Uptime 30d', 'Status']);
-
-        // Write sample data
-        $data = [
-            ['Web Server 1', '99.9%', '99.95%', '99.87%', 'Online'],
-            ['Web Server 2', '100%', '99.98%', '99.92%', 'Online'],
-            ['Database Server', '99.95%', '99.99%', '99.98%', 'Online'],
-            ['Mail Server', '100%', '99.99%', '99.95%', 'Online'],
-        ];
 
         foreach ($data as $row) {
             fputcsv($output, $row);
         }
 
         fclose($output);
+        
     } else if ($format === 'pdf') {
-        // For PDF, we'd use a library like TCPDF or DomPDF
-        // For now, just return a message
-        header('Content-Type: application/json');
-        echo json_encode([
-            'success' => true,
-            'message' => 'PDF export would be generated here',
-            'note' => 'Install TCPDF or DomPDF for PDF support'
-        ]);
+        // Export as PDF using Dompdf
+        require_once dirname(__DIR__, 3) . '/vendor/autoload.php';
+        
+        $options = new \Dompdf\Options();
+        $options->set('defaultFont', 'Helvetica');
+        $options->set('isHtml5ParserEnabled', true);
+        
+        $dompdf = new \Dompdf\Dompdf($options);
+        
+        // Table HTML
+        $html = '<div style="text-align: center; font-family: Helvetica, sans-serif;">
+            <h2>System Health Report</h2>
+            <p>Generated on: ' . date('Y-m-d H:i:s') . '</p>
+            <table border="1" cellpadding="8" cellspacing="0" style="width:100%; border-collapse: collapse; margin-top: 20px;">
+            <thead>
+                <tr style="background-color:#f1f5f9;">
+                    <th style="width: 30%; text-align: left;">Server</th>
+                    <th style="width: 15%;">Uptime 24h</th>
+                    <th style="width: 15%;">Uptime 7d</th>
+                    <th style="width: 15%;">Uptime 30d</th>
+                    <th style="width: 25%;">Status</th>
+                </tr>
+            </thead>
+            <tbody>';
+            
+        foreach ($data as $row) {
+            $statusColor = strtolower($row[4]) === 'online' ? '#10b981' : '#ef4444';
+            $html .= '<tr>
+                <td style="text-align:left;">' . htmlspecialchars($row[0]) . '</td>
+                <td>' . htmlspecialchars($row[1]) . '</td>
+                <td>' . htmlspecialchars($row[2]) . '</td>
+                <td>' . htmlspecialchars($row[3]) . '</td>
+                <td style="color:' . $statusColor . '; font-weight:bold;">' . htmlspecialchars($row[4]) . '</td>
+            </tr>';
+        }
+        
+        $html .= '</tbody></table></div>';
+        
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+        
+        $dompdf->stream('server-report-' . date('Y-m-d') . '.pdf', array("Attachment" => true));
+        
     } else {
         throw new Exception('Invalid export format');
     }
@@ -57,6 +112,7 @@ try {
     // Log action
     $audit = app(\App\Infrastructure\Logging\AuditService::class);
     $audit->log('export', 'reports', null, $auth->user()->id, ['message' => "Exported report as $format"]);
+    
 } catch (Exception $e) {
     header('HTTP/1.1 500 Internal Server Error');
     echo json_encode([

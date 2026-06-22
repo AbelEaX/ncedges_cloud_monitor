@@ -16,11 +16,29 @@ if (!$auth->isAuthenticated() || !$auth->hasPermission('reports.view')) {
 }
 
 try {
-    $activity = [
-        ['user_name' => 'Admin', 'action' => 'create', 'details' => 'Created new server: Web Server 3', 'created_at' => date('Y-m-d H:i:s', time() - 3600)],
-        ['user_name' => 'Manager', 'action' => 'update', 'details' => 'Updated Mail Server settings', 'created_at' => date('Y-m-d H:i:s', time() - 7200)],
-        ['user_name' => 'Admin', 'action' => 'delete', 'details' => 'Deleted server: Old Server', 'created_at' => date('Y-m-d H:i:s', time() - 10800)],
-    ];
+    $range = $_GET['range'] ?? '7d';
+    $rangeFilter = match($range) {
+        '24h' => '-1 day',
+        '30d' => '-30 days',
+        '90d' => '-90 days',
+        default => '-7 days',
+    };
+    
+    $connection = app(\App\Infrastructure\Database\Connection::class);
+    $sql = "
+    SELECT 
+        COALESCE(u.username, 'System') as user_name, 
+        a.action, 
+        a.details, 
+        a.created_at 
+    FROM audit_logs a
+    LEFT JOIN users u ON a.user_id = u.id
+    WHERE a.created_at >= datetime('now', :range)
+    ORDER BY a.created_at DESC 
+    LIMIT 50
+    ";
+    
+    $activity = $connection->fetchAll($sql, ['range' => $rangeFilter]);
 
     header('Content-Type: application/json');
     echo json_encode([

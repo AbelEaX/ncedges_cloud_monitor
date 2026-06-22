@@ -15,6 +15,13 @@ if (!$auth->isAuthenticated() || (!$auth->hasPermission('settings.edit') && !$au
     exit;
 }
 
+$csrfToken = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
+if (!$auth->validateCsrfToken($csrfToken)) {
+    header('HTTP/1.1 403 Forbidden');
+    echo json_encode(['success' => false, 'message' => 'Invalid CSRF token']);
+    exit;
+}
+
 try {
     $section = $_GET['section'] ?? 'general';
     $input = json_decode(file_get_contents('php://input'), true);
@@ -23,10 +30,10 @@ try {
 
     if ($section === 'general') {
         if (isset($input['app_name'])) {
-            $settingsRepo->set('app.name', $input['app_name'], 'string', 'Application name');
+            $settingsRepo->set('app.name', htmlspecialchars(trim($input['app_name']), ENT_QUOTES, 'UTF-8'), 'string', 'Application name');
         }
         if (isset($input['app_url'])) {
-            $settingsRepo->set('app.url', $input['app_url'], 'string', 'Application URL');
+            $settingsRepo->set('app.url', filter_var($input['app_url'], FILTER_SANITIZE_URL), 'string', 'Application URL');
         }
         if (isset($input['timezone'])) {
             $settingsRepo->set('app.timezone', $input['timezone'], 'string', 'Application timezone');
@@ -49,29 +56,29 @@ try {
         $enabled = isset($input['enabled']) && ($input['enabled'] === 'on' || $input['enabled'] == 1);
         $settingsRepo->set('smtp.enabled', $enabled, 'boolean', 'Enable SMTP');
         if (isset($input['host'])) {
-            $settingsRepo->set('smtp.smtp.host', $input['host'], 'string', 'SMTP Host');
+            $settingsRepo->set('smtp.smtp.host', htmlspecialchars(trim($input['host']), ENT_QUOTES, 'UTF-8'), 'string', 'SMTP Host');
         }
         if (isset($input['port'])) {
             $settingsRepo->set('smtp.smtp.port', (int) $input['port'], 'integer', 'SMTP Port');
         }
         if (isset($input['username'])) {
-            $settingsRepo->set('smtp.smtp.username', $input['username'], 'string', 'SMTP Username');
+            $settingsRepo->set('smtp.smtp.username', htmlspecialchars(trim($input['username']), ENT_QUOTES, 'UTF-8'), 'string', 'SMTP Username');
         }
         // Only save password if it is provided (not empty)
         if (!empty($input['password'])) {
-            $settingsRepo->set('smtp.smtp.password', $input['password'], 'string', 'SMTP Password');
+            $settingsRepo->set('smtp.smtp.password', $input['password'], 'string', 'SMTP Password', true);
         }
         if (isset($input['encryption'])) {
-            $settingsRepo->set('smtp.smtp.encryption', $input['encryption'], 'string', 'SMTP Encryption');
+            $settingsRepo->set('smtp.smtp.encryption', htmlspecialchars(trim($input['encryption']), ENT_QUOTES, 'UTF-8'), 'string', 'SMTP Encryption');
         }
         if (isset($input['timeout'])) {
             $settingsRepo->set('smtp.smtp.timeout', (int) $input['timeout'], 'integer', 'SMTP Timeout');
         }
         if (isset($input['from_address'])) {
-            $settingsRepo->set('smtp.from.address', $input['from_address'], 'string', 'SMTP From Address');
+            $settingsRepo->set('smtp.from.address', filter_var($input['from_address'], FILTER_SANITIZE_EMAIL), 'string', 'SMTP From Address');
         }
         if (isset($input['from_name'])) {
-            $settingsRepo->set('smtp.from.name', $input['from_name'], 'string', 'SMTP From Name');
+            $settingsRepo->set('smtp.from.name', htmlspecialchars(trim($input['from_name']), ENT_QUOTES, 'UTF-8'), 'string', 'SMTP From Name');
         }
     } elseif ($section === 'notifications') {
         $enabled = isset($input['enabled']) && ($input['enabled'] === 'on' || $input['enabled'] == 1);

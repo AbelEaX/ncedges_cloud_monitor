@@ -16,10 +16,31 @@ if (!$auth->isAuthenticated() || !$auth->hasPermission('reports.view')) {
 }
 
 try {
-    $alerts = [
-        ['server_name' => 'Web Server 1', 'alert_type' => 'High CPU', 'message' => 'CPU usage above 80%', 'severity' => 'warning', 'created_at' => date('Y-m-d H:i:s', time() - 3600)],
-        ['server_name' => 'Mail Server', 'alert_type' => 'Disk Space', 'message' => 'Disk usage at 85%', 'severity' => 'critical', 'created_at' => date('Y-m-d H:i:s', time() - 7200)],
-    ];
+    $range = $_GET['range'] ?? '7d';
+    $rangeFilter = match($range) {
+        '24h' => '-1 day',
+        '30d' => '-30 days',
+        '90d' => '-90 days',
+        default => '-7 days',
+    };
+    
+    $connection = app(\App\Infrastructure\Database\Connection::class);
+    $sql = "SELECT subject, message, type as channel, status, created_at FROM notifications WHERE created_at >= datetime('now', :range) ORDER BY created_at DESC LIMIT 50";
+    $notifications = $connection->fetchAll($sql, ['range' => $rangeFilter]);
+
+    $alerts = [];
+    foreach ($notifications as $n) {
+        $isAlert = strpos($n['subject'], '[ALERT]') !== false;
+        $serverName = trim(str_replace(['[ALERT]', '[RECOVERY]'], '', $n['subject']));
+        
+        $alerts[] = [
+            'server_name' => $serverName ?: 'System',
+            'alert_type' => $isAlert ? 'Downtime Alert' : 'Recovery',
+            'message' => $n['message'],
+            'severity' => $isAlert ? 'critical' : 'info',
+            'created_at' => $n['created_at']
+        ];
+    }
 
     header('Content-Type: application/json');
     echo json_encode([

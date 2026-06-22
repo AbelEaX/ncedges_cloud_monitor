@@ -49,7 +49,7 @@ try {
 }
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="<?= htmlspecialchars($themeService->getCurrentTheme()); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -77,67 +77,11 @@ try {
             background: var(--bg-color);
             color: var(--text-color);
         }
-        nav {
-            background: var(--surface-color);
-            padding: 0 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            border-bottom: 1px solid var(--border-color);
-        }
-        .nav-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            height: 60px;
-        }
-        .nav-logo {
-            font-size: 20px;
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-        .nav-links {
-            display: flex;
-            gap: 30px;
-            align-items: center;
-        }
-        .nav-links a {
-            text-decoration: none;
-            color: var(--muted-color);
-            font-size: 14px;
-            transition: color 0.3s ease;
-        }
-        .nav-links a:hover {
-            color: var(--primary-color);
-        }
-        .nav-user {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            color: var(--text-color);
-        }
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: var(--primary-color);
-            color: #000000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-        }
-        .logout-btn {
-            background: none;
-            border: none;
-            color: var(--danger-color);
-            cursor: pointer;
-            font-size: 14px;
-            text-decoration: underline;
-        }
+        .theme-toggle-btn { background: none; border: none; cursor: pointer; font-size: 18px; color: var(--text-color); margin-right: 15px; }
+        [data-theme="dark"] .light-icon { display: inline !important; }
+        [data-theme="dark"] .dark-icon { display: none !important; }
+        [data-theme="light"] .dark-icon { display: inline !important; }
+        [data-theme="light"] .light-icon { display: none !important; }
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -145,9 +89,8 @@ try {
         }
         .welcome {
             background: var(--surface-color);
-            padding: 30px;
+            padding: 24px;
             border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             margin-bottom: 40px;
             border: 1px solid var(--border-color);
         }
@@ -168,9 +111,8 @@ try {
         }
         .section-card {
             background: var(--surface-color);
-            padding: 30px;
+            padding: 24px;
             border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             text-decoration: none;
             color: inherit;
             transition: all 0.3s ease;
@@ -178,7 +120,6 @@ try {
             border-left: 4px solid var(--primary-color);
         }
         .section-card:hover {
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             transform: translateY(-2px);
         }
         .section-card h2 {
@@ -230,9 +171,8 @@ try {
         }
         .dashboard-info {
             background: var(--surface-color);
-            padding: 30px;
+            padding: 24px;
             border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             border: 1px solid var(--border-color);
         }
         .dashboard-info h2 {
@@ -247,7 +187,7 @@ try {
         }
         .info-box {
             background: var(--bg-color);
-            padding: 20px;
+            padding: 24px;
             border-radius: 8px;
             border: 1px solid var(--border-color);
             border-left: 3px solid var(--primary-color);
@@ -266,32 +206,34 @@ try {
     </style>
 </head>
 <body>
-    <nav>
-        <div class="nav-content">
-            <div class="nav-logo">📡 Monitor</div>
-            <div class="nav-links">
-                <a href="/dashboard">Dashboard</a>
-                <a href="/servers">Servers</a>
-                <a href="/settings">Settings</a>
-                <a href="/reports">Reports</a>
-            </div>
-            <div class="nav-user">
-                <div class="user-avatar"><?php echo strtoupper(substr($user->getUsername() ?? 'U', 0, 1)); ?></div>
-                <div style="font-size: 14px;">
-                    <div style="font-weight: 500;"><?php echo htmlspecialchars($user->getUsername() ?? 'User'); ?></div>
-                    <div style="color: var(--muted-color); font-size: 12px;"><?php echo ucfirst($user->getRole()); ?></div>
-                </div>
-                <form action="/api/auth/logout" method="POST" style="margin: 0;">
-                    <button type="submit" class="logout-btn">Logout</button>
-                </form>
-            </div>
-        </div>
-    </nav>
+    <?= component('nav', ['user' => $user]) ?>
 
     <div class="container">
         <div class="welcome">
             <h1>Welcome, <?php echo htmlspecialchars($user->getUsername() ?? 'Admin'); ?>! 👋</h1>
             <p>Monitor your cloud infrastructure in real-time</p>
+        </div>
+
+        <div class="dashboard-info" style="margin-bottom: 40px;">
+            <h2>Quick Status</h2>
+            <div class="info-grid">
+                <div class="info-box">
+                    <h3>Total Servers</h3>
+                    <div class="value"><?php echo $totalServers; ?></div>
+                </div>
+                <div class="info-box">
+                    <h3>Online</h3>
+                    <div class="value" style="color: #10b981;"><?php echo $onlineServers; ?></div>
+                </div>
+                <div class="info-box">
+                    <h3>Offline</h3>
+                    <div class="value" style="color: #ef4444;"><?php echo $offlineServers; ?></div>
+                </div>
+                <div class="info-box">
+                    <h3>Alerts</h3>
+                    <div class="value" style="color: #f59e0b;"><?php echo $alertsCount; ?></div>
+                </div>
+            </div>
         </div>
 
         <div class="sections">
@@ -332,31 +274,18 @@ try {
             </a>
         </div>
 
-        <div class="dashboard-info">
-            <h2>Quick Status</h2>
-            <div class="info-grid">
-                <div class="info-box">
-                    <h3>Total Servers</h3>
-                    <div class="value"><?php echo $totalServers; ?></div>
-                </div>
-                <div class="info-box">
-                    <h3>Online</h3>
-                    <div class="value" style="color: #10b981;"><?php echo $onlineServers; ?></div>
-                </div>
-                <div class="info-box">
-                    <h3>Offline</h3>
-                    <div class="value" style="color: #ef4444;"><?php echo $offlineServers; ?></div>
-                </div>
-                <div class="info-box">
-                    <h3>Alerts</h3>
-                    <div class="value" style="color: #f59e0b;"><?php echo $alertsCount; ?></div>
-                </div>
-            </div>
-        </div>
-
         <div style="text-align: center; margin-top: 40px; color: #9ca3af; font-size: 13px;">
             <p>Monitor v1.0.0 | Built with Clean Architecture | Last updated: <?php echo date('Y-m-d H:i:s'); ?></p>
         </div>
     </div>
+    <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            document.cookie = "theme=" + newTheme + "; path=/; max-age=31536000";
+        }
+    </script>
 </body>
 </html>

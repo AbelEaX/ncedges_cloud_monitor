@@ -75,6 +75,12 @@ class Connection
                     PDO::ATTR_EMULATE_PREPARES => false,
                 ]
             );
+
+            // Enable WAL mode for SQLite to handle concurrency
+            if (($driver['driver'] ?? 'sqlite') === 'sqlite') {
+                $this->pdo->exec('PRAGMA journal_mode = WAL;');
+                $this->pdo->exec('PRAGMA busy_timeout = 5000;');
+            }
         } catch (PDOException $e) {
             throw new PDOException("Database connection failed: " . $e->getMessage());
         }

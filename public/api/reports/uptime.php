@@ -16,13 +16,31 @@ if (!$auth->isAuthenticated() || !$auth->hasPermission('reports.view')) {
 }
 
 try {
-    // Sample uptime data
-    $uptime = [
-        ['server_name' => 'Web Server 1', 'uptime_24h' => 99.9, 'uptime_7d' => 99.95, 'uptime_30d' => 99.87],
-        ['server_name' => 'Web Server 2', 'uptime_24h' => 100, 'uptime_7d' => 99.98, 'uptime_30d' => 99.92],
-        ['server_name' => 'Database Server', 'uptime_24h' => 99.95, 'uptime_7d' => 99.99, 'uptime_30d' => 99.98],
-        ['server_name' => 'Mail Server', 'uptime_24h' => 100, 'uptime_7d' => 99.99, 'uptime_30d' => 99.95],
-    ];
+    $range = $_GET['range'] ?? '7d';
+    $connection = app(\App\Infrastructure\Database\Connection::class);
+    
+    // SQLite query for 24h, 7d, 30d
+    $sql = "
+    SELECT 
+        s.name as server_name,
+        s.status as current_status,
+        (SUM(CASE WHEN sm.status = 'online' AND sm.checked_at >= datetime('now', '-1 day') THEN 1 ELSE 0 END) * 100.0 / NULLIF(COUNT(CASE WHEN sm.checked_at >= datetime('now', '-1 day') THEN 1 END), 0)) as uptime_24h,
+        (SUM(CASE WHEN sm.status = 'online' AND sm.checked_at >= datetime('now', '-7 days') THEN 1 ELSE 0 END) * 100.0 / NULLIF(COUNT(CASE WHEN sm.checked_at >= datetime('now', '-7 days') THEN 1 END), 0)) as uptime_7d,
+        (SUM(CASE WHEN sm.status = 'online' AND sm.checked_at >= datetime('now', '-30 days') THEN 1 ELSE 0 END) * 100.0 / NULLIF(COUNT(CASE WHEN sm.checked_at >= datetime('now', '-30 days') THEN 1 END), 0)) as uptime_30d
+    FROM servers s
+    LEFT JOIN server_metrics sm ON s.id = sm.server_id
+    GROUP BY s.id, s.name, s.status
+    ORDER BY s.name ASC
+    ";
+    
+    $uptime = $connection->fetchAll($sql);
+    
+    // Format results and handle nulls for servers with no metrics yet
+    foreach ($uptime as &$row) {
+        $row['uptime_24h'] = $row['uptime_24h'] !== null ? round((float)$row['uptime_24h'], 2) : 100.0;
+        $row['uptime_7d'] = $row['uptime_7d'] !== null ? round((float)$row['uptime_7d'], 2) : 100.0;
+        $row['uptime_30d'] = $row['uptime_30d'] !== null ? round((float)$row['uptime_30d'], 2) : 100.0;
+    }
 
     header('Content-Type: application/json');
     echo json_encode([

@@ -15,6 +15,13 @@ if (!$auth->isAuthenticated() || !$auth->hasPermission('server.edit')) {
     exit;
 }
 
+$csrfToken = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
+if (!$auth->validateCsrfToken($csrfToken)) {
+    header('HTTP/1.1 403 Forbidden');
+    echo json_encode(['success' => false, 'message' => 'Invalid CSRF token']);
+    exit;
+}
+
 try {
     $id = $_GET['id'] ?? null;
     if (!$id) {
@@ -33,22 +40,22 @@ try {
 
     // Update fields
     if (isset($input['name'])) {
-        $server->name = $input['name'];
+        $server->name = htmlspecialchars(trim($input['name']), ENT_QUOTES, 'UTF-8');
     }
     if (isset($input['host'])) {
-        $server->host = $input['host'];
+        $server->host = htmlspecialchars(trim($input['host']), ENT_QUOTES, 'UTF-8');
     }
     if (isset($input['port'])) {
         $server->port = (int) $input['port'];
     }
     if (isset($input['description'])) {
-        $server->description = $input['description'];
+        $server->description = htmlspecialchars(trim($input['description']), ENT_QUOTES, 'UTF-8');
     }
     if (isset($input['is_active'])) {
         $server->is_active = (bool) $input['is_active'];
     }
     if (isset($input['group_name'])) {
-        $server->group_name = $input['group_name'];
+        $server->group_name = htmlspecialchars(trim($input['group_name']), ENT_QUOTES, 'UTF-8');
     }
 
     $serverRepo->update($server);

@@ -17,12 +17,20 @@ if (!$auth->isAuthenticated() || !$auth->hasPermission('reports.view')) {
 
 try {
     $range = $_GET['range'] ?? '7d';
+    
+    $rangeFilter = match($range) {
+        '24h' => '-1 day',
+        '30d' => '-30 days',
+        '90d' => '-90 days',
+        default => '-7 days',
+    };
 
     // Get metrics data dynamically
     $total = 0;
     $online = 0;
     $offline = 0;
     $alertsCount = 0;
+    $avgUptime = 100.0;
 
     try {
         $serverRepo = app(\App\Infrastructure\Repositories\ServerRepository::class);
@@ -43,6 +51,12 @@ try {
         $connection = app(\App\Infrastructure\Database\Connection::class);
         $alertsCountRow = $connection->fetchOne("SELECT COUNT(*) as cnt FROM notifications");
         $alertsCount = $alertsCountRow ? (int) $alertsCountRow['cnt'] : 0;
+        
+        $uptimeSql = "SELECT (SUM(CASE WHEN status = 'online' THEN 1 ELSE 0 END) * 100.0 / NULLIF(COUNT(*), 0)) as avg_uptime FROM server_metrics WHERE checked_at >= datetime('now', :range)";
+        $uptimeRow = $connection->fetchOne($uptimeSql, ['range' => $rangeFilter]);
+        if ($uptimeRow && $uptimeRow['avg_uptime'] !== null) {
+            $avgUptime = round((float)$uptimeRow['avg_uptime'], 2);
+        }
     } catch (Exception $e) {
         // Fallback
     }
@@ -51,7 +65,7 @@ try {
         'total_servers' => $total,
         'online_servers' => $online,
         'offline_servers' => $offline,
-        'avg_uptime' => $total > 0 ? 100.0 : 0.0,
+        'avg_uptime' => $total > 0 ? $avgUptime : 0.0,
         'alert_count' => $alertsCount,
     ];
 

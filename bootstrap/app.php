@@ -50,6 +50,52 @@ if ($isDevelopment) {
     ini_set('display_errors', '0');
 }
 
+// Global Exception Handler
+set_exception_handler(function (\Throwable $e) use ($isDevelopment) {
+    // Log the exception
+    global $container;
+    if (isset($container) && $container->has(\App\Infrastructure\Logging\Logger::class)) {
+        $container->resolve(\App\Infrastructure\Logging\Logger::class)->error(
+            'Uncaught Exception: ' . $e->getMessage(),
+            ['trace' => $e->getTraceAsString()],
+            'system'
+        );
+    } else {
+        error_log('Uncaught Exception: ' . $e->getMessage());
+    }
+
+    // Check if API request
+    $isApi = strpos($_SERVER['REQUEST_URI'] ?? '', '/api/') === 0;
+    
+    if ($isApi) {
+        header('Content-Type: application/json');
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Internal Server Error',
+            'error' => $isDevelopment ? $e->getMessage() : null
+        ]);
+        exit;
+    }
+    
+    // For web requests
+    http_response_code(500);
+    if ($isDevelopment) {
+        echo "<h1>Internal Server Error</h1><p>" . htmlspecialchars($e->getMessage()) . "</p>";
+    } else {
+        echo "<h1>500 Internal Server Error</h1><p>Something went wrong. Please try again later.</p>";
+    }
+    exit;
+});
+
+// Global Error Handler
+set_error_handler(function ($severity, $message, $file, $line) {
+    if (!(error_reporting() & $severity)) {
+        return false; // Error code is not included in error_reporting
+    }
+    throw new \ErrorException($message, 0, $severity, $file, $line);
+});
+
 // Register autoloader
 // Try to load composer autoloader, otherwise use simple PSR-4 autoloader
 if (file_exists(BASE_PATH . '/vendor/composer/autoload_classmap.php')) {

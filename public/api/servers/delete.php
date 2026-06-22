@@ -15,6 +15,13 @@ if (!$auth->isAuthenticated() || !$auth->hasPermission('server.delete')) {
     exit;
 }
 
+$csrfToken = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
+if (!$auth->validateCsrfToken($csrfToken)) {
+    header('HTTP/1.1 403 Forbidden');
+    echo json_encode(['success' => false, 'message' => 'Invalid CSRF token']);
+    exit;
+}
+
 try {
     $id = $_GET['id'] ?? null;
     if (!$id) {

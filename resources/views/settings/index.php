@@ -5,7 +5,7 @@
 $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="<?= htmlspecialchars($themeService->getCurrentTheme()); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -32,15 +32,13 @@ $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
             line-height: var(--line-height, 1.5);
             background: var(--bg-color);
             color: var(--text-color);
-            padding: var(--container-padding, 20px);
         }
-        .container { max-width: 1200px; margin: 0 auto; }
+        .container { max-width: 1200px; margin: 0 auto; padding: var(--container-padding, 20px); }
         header {
             margin-bottom: 30px;
             background: var(--surface-color);
-            padding: 20px;
+            padding: 24px;
             border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             border: 1px solid var(--border-color);
         }
         h1 { font-size: 28px; }
@@ -51,9 +49,8 @@ $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
         }
         .sidebar {
             background: var(--surface-color);
-            padding: 20px;
+            padding: 24px;
             border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             height: fit-content;
             border: 1px solid var(--border-color);
         }
@@ -78,9 +75,8 @@ $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
         }
         .settings-section {
             background: var(--surface-color);
-            padding: 30px;
+            padding: 24px;
             border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             display: none;
             border: 1px solid var(--border-color);
         }
@@ -189,7 +185,7 @@ $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
         }
         .theme-option {
             flex: 1;
-            padding: 20px;
+            padding: 24px;
             border: 2px solid var(--border-color);
             border-radius: 8px;
             cursor: pointer;
@@ -215,13 +211,18 @@ $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
             border-top: 1px solid var(--border-color);
             margin: 30px 0;
         }
+        .theme-toggle-btn { background: none; border: none; cursor: pointer; font-size: 18px; color: var(--text-color); margin-right: 15px; }
+        [data-theme="dark"] .light-icon { display: inline !important; }
+        [data-theme="dark"] .dark-icon { display: none !important; }
+        [data-theme="light"] .dark-icon { display: inline !important; }
+        [data-theme="light"] .light-icon { display: none !important; }
     </style>
 </head>
 <body>
+    <?= component('nav', ['user' => $user ?? null]) ?>
     <div class="container">
-        <header>
+        <header style="display: flex; justify-content: space-between; align-items: center;">
             <div style="display: flex; align-items: center; gap: 15px;">
-                <a href="/dashboard.php" style="text-decoration: none; font-size: 24px; color: #6b7280;" title="Back to Dashboard">←</a>
                 <div>
                     <h1>Settings</h1>
                     <p style="color: #6b7280; margin-top: 5px;">Configure application settings and preferences</p>
@@ -561,6 +562,7 @@ $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
                 },
                 body: JSON.stringify(data)
             })
@@ -583,6 +585,7 @@ $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
                 },
                 body: JSON.stringify({
                     to: '<?php echo $_SESSION['user_email'] ?? 'admin@example.com'; ?>'
@@ -609,6 +612,14 @@ $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
             setTimeout(() => {
                 alert.style.display = 'none';
             }, 5000);
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            document.cookie = "theme=" + newTheme + "; path=/; max-age=31536000";
         }
     </script>
 </body>

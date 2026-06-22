@@ -7,7 +7,7 @@
 $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="<?= htmlspecialchars($themeService->getCurrentTheme()); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -34,18 +34,16 @@ $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
             line-height: var(--line-height, 1.5);
             background: var(--bg-color);
             color: var(--text-color);
-            padding: var(--container-padding, 20px);
         }
-        .container { max-width: 1200px; margin: 0 auto; }
+        .container { max-width: 1200px; margin: 0 auto; padding: var(--container-padding, 20px); }
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 30px;
             background: var(--surface-color);
-            padding: 20px;
+            padding: 24px;
             border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             border: 1px solid var(--border-color);
         }
         h1 { font-size: 28px; }
@@ -92,7 +90,6 @@ $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
             border-collapse: collapse;
             border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             border: 1px solid var(--border-color);
         }
         .table th {
@@ -182,16 +179,28 @@ $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
             border-color: var(--primary-color);
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
+        .theme-toggle-btn { background: none; border: none; cursor: pointer; font-size: 18px; color: var(--text-color); margin-right: 15px; }
+        [data-theme="dark"] .light-icon { display: inline !important; }
+        [data-theme="dark"] .dark-icon { display: none !important; }
+        [data-theme="light"] .dark-icon { display: inline !important; }
+        [data-theme="light"] .light-icon { display: none !important; }
     </style>
 </head>
 <body>
+    <?= component('nav', ['user' => $user ?? null]) ?>
     <div class="container">
         <header>
             <div style="display: flex; align-items: center; gap: 15px;">
-                <a href="/dashboard.php" style="text-decoration: none; font-size: 24px; color: #6b7280;" title="Back to Dashboard">←</a>
-                <h1>Server Management</h1>
+                <div>
+                    <h1>Server Management</h1>
+                    <p style="color: var(--muted-color); margin-top: 5px;">Manage your monitored servers</p>
+                </div>
             </div>
-            <button class="btn btn-primary" onclick="openCreateForm()">Add New Server</button>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <?php if ($auth->hasPermission('server.create')): ?>
+                <button class="btn btn-primary" onclick="openCreateForm()">Add New Server</button>
+                <?php endif; ?>
+            </div>
         </header>
 
         <div id="alert" class="alert"></div>
@@ -206,7 +215,7 @@ $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
 
     <!-- Modal for Create/Edit -->
     <div id="serverModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000;">
-        <div class="modal-content" style="width: 90%; max-width: 500px; margin: 50px auto; padding: 30px; border-radius: 8px;">
+        <div class="modal-content" style="width: 90%; max-width: 500px; margin: 50px auto; padding: 24px; border-radius: 8px;">
             <h2 id="modalTitle" style="margin-bottom: 20px;">Add New Server</h2>
             <form id="serverForm" onsubmit="handleSubmit(event)">
                 <input type="hidden" id="serverId">
@@ -247,6 +256,10 @@ $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
     </div>
 
     <script>
+        const canCreateServer = <?= $auth->hasPermission('server.create') ? 'true' : 'false' ?>;
+        const canEditServer = <?= $auth->hasPermission('server.edit') ? 'true' : 'false' ?>;
+        const canDeleteServer = <?= $auth->hasPermission('server.delete') ? 'true' : 'false' ?>;
+
         // Load servers on page load
         document.addEventListener('DOMContentLoaded', loadServers);
 
@@ -274,7 +287,7 @@ $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
                     <div class="empty-state">
                         <h2>No Servers Yet</h2>
                         <p>Start by adding your first server to monitor</p>
-                        <button class="btn btn-primary" onclick="openCreateForm()">Add Server</button>
+                        ${canCreateServer ? '<button class="btn btn-primary" onclick="openCreateForm()">Add Server</button>' : ''}
                     </div>
                 `;
                 return;
@@ -296,21 +309,48 @@ $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
             `;
 
             servers.forEach(server => {
-                const status = server.is_active ? 'online' : 'offline';
-                const statusText = server.is_active ? 'Active' : 'Inactive';
+                const isMonitoring = server.is_active ? true : false;
+                
+                // Real-time health status
+                let status = 'unknown';
+                let statusText = 'Unknown';
+                let badgeClass = 'status-offline';
+                
+                if (!isMonitoring) {
+                    statusText = 'Monitoring Disabled';
+                    badgeClass = 'status-offline';
+                } else if (server.status === 'online') {
+                    status = 'online';
+                    statusText = 'Online';
+                    badgeClass = 'status-online';
+                } else if (server.status === 'offline') {
+                    status = 'offline';
+                    statusText = 'Offline';
+                    badgeClass = 'status-offline'; // Assuming red badge
+                } else {
+                    statusText = 'Pending Check';
+                }
+
                 const created = new Date(server.created_at).toLocaleDateString();
+
+                let actionButtons = '';
+                if (canEditServer) {
+                    actionButtons += `<button class="btn btn-secondary" onclick="editServer(${server.id})">Edit</button>`;
+                }
+                if (canDeleteServer) {
+                    actionButtons += ` <button class="btn btn-danger" onclick="deleteServer(${server.id})">Delete</button>`;
+                }
 
                 html += `
                     <tr>
                         <td><strong>${server.name}</strong></td>
                         <td>${server.host}</td>
                         <td>${server.port || '443'}</td>
-                        <td><span class="status-badge status-${status}">${statusText}</span></td>
+                        <td><span class="status-badge ${badgeClass}">${statusText}</span></td>
                         <td>${created}</td>
                         <td>
                             <div class="actions">
-                                <button class="btn btn-secondary" onclick="editServer(${server.id})">Edit</button>
-                                <button class="btn btn-danger" onclick="deleteServer(${server.id})">Delete</button>
+                                ${actionButtons}
                             </div>
                         </td>
                     </tr>
@@ -370,6 +410,7 @@ $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
                 method: method,
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
                 },
                 body: JSON.stringify(data)
             })
@@ -393,7 +434,10 @@ $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
             if (!confirm('Are you sure you want to delete this server?')) return;
 
             fetch(`/api/servers/delete.php?id=${id}`, {
-                method: 'DELETE'
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+                }
             })
             .then(response => response.json())
             .then(data => {
@@ -425,6 +469,14 @@ $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
                 closeModal();
             }
         });
+        
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            document.cookie = "theme=" + newTheme + "; path=/; max-age=31536000";
+        }
     </script>
 </body>
 </html>

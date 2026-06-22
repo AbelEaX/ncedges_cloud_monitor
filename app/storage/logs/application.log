@@ -34,3 +34,5 @@
 [2026-06-19 15:08:29] [ERROR] Failed to retrieve servers | Context: {"error":"Failed to parse time string (NOW() at position 3 ((): Unexpected character"}
 [2026-06-19 15:10:11] [INFO] Database seeding completed
 [2026-06-19 15:18:47] [INFO] Database seeding completed
+[2026-06-22 06:29:07] [ERROR] Error in weekly report script | Context: {"error":"SQLSTATE[HY000]: General error: 1 no such column: setting_value"}
+[2026-06-22 06:29:48] [ERROR] Failed to send weekly report to admin@monitor.local

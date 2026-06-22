@@ -15,6 +15,13 @@ if (!$auth->isAuthenticated() || !$auth->hasPermission('server.create')) {
     exit;
 }
 
+$csrfToken = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
+if (!$auth->validateCsrfToken($csrfToken)) {
+    header('HTTP/1.1 403 Forbidden');
+    echo json_encode(['success' => false, 'message' => 'Invalid CSRF token']);
+    exit;
+}
+
 try {
     $input = json_decode(file_get_contents('php://input'), true);
 
@@ -22,15 +29,20 @@ try {
         throw new Exception('Name and host are required');
     }
 
+    $name = htmlspecialchars(trim($input['name']), ENT_QUOTES, 'UTF-8');
+    $host = htmlspecialchars(trim($input['host']), ENT_QUOTES, 'UTF-8');
+    $description = isset($input['description']) ? htmlspecialchars(trim($input['description']), ENT_QUOTES, 'UTF-8') : null;
+    $group_name = isset($input['group_name']) ? htmlspecialchars(trim($input['group_name']), ENT_QUOTES, 'UTF-8') : null;
+
     $serverRepo = app(\App\Infrastructure\Repositories\ServerRepository::class);
     $server = new \App\Domain\Entities\Server(
         id: null,
-        name: $input['name'],
-        host: $input['host'],
+        name: $name,
+        host: $host,
         port: isset($input['port']) ? (int) $input['port'] : 443,
-        description: $input['description'] ?? null,
+        description: $description,
         status: 'unknown',
-        group_name: $input['group_name'] ?? null,
+        group_name: $group_name,
         is_active: isset($input['is_active']) ? (bool) $input['is_active'] : true
     );
 

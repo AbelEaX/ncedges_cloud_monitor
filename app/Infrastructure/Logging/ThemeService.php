@@ -126,15 +126,12 @@ class ThemeService
     public function generateCSSVariables(): string
     {
         $colors = $this->getColors();
-        $themeColors = $this->getThemeColors();
         
         $css = ':root {' . PHP_EOL;
         
-        // Add color variables
-        foreach (array_merge($colors, $themeColors) as $name => $value) {
-            if (is_array($value)) {
-                continue; // Skip nested arrays
-            }
+        // Add base color variables
+        foreach ($colors as $name => $value) {
+            if (is_array($value)) continue;
             $varName = $this->convertToKebabCase($name);
             $css .= "    --{$varName}: {$value};" . PHP_EOL;
         }
@@ -153,6 +150,26 @@ class ThemeService
             $css .= "    --{$varName}: {$value};" . PHP_EOL;
         }
         
+        $css .= '}' . PHP_EOL;
+        
+        // Dark theme variables
+        $css .= '[data-theme="dark"] {' . PHP_EOL;
+        $darkColors = $this->config['dark'] ?? [];
+        foreach ($darkColors as $name => $value) {
+            if (is_array($value)) continue;
+            $varName = $this->convertToKebabCase($name);
+            $css .= "    --{$varName}: {$value};" . PHP_EOL;
+        }
+        $css .= '}' . PHP_EOL;
+        
+        // Light theme variables
+        $css .= '[data-theme="light"] {' . PHP_EOL;
+        $lightColors = $this->config['light'] ?? [];
+        foreach ($lightColors as $name => $value) {
+            if (is_array($value)) continue;
+            $varName = $this->convertToKebabCase($name);
+            $css .= "    --{$varName}: {$value};" . PHP_EOL;
+        }
         $css .= '}' . PHP_EOL;
         
         return $css;

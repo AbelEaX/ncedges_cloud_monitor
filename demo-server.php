@@ -56,14 +56,14 @@ if ($action === 'logout') {
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #1a1a2e; color: #e0e0e0; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
         .container { width: 100%; max-width: 500px; padding: 20px; }
-        .box { background: #16213e; border: 1px solid #444; border-radius: 8px; padding: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
+        .box { background: #16213e; border: 1px solid #444; border-radius: 8px; padding: 40px; }
         h1 { color: #ffc107; margin-bottom: 30px; font-size: 28px; text-align: center; }
         .form-group { margin-bottom: 20px; }
         label { display: block; margin-bottom: 8px; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
         input { width: 100%; padding: 12px 16px; background: #0f3460; border: 1px solid #444; border-radius: 6px; color: #e0e0e0; font-size: 14px; }
         input:focus { outline: none; border-color: #ffc107; box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.1); }
         button { width: 100%; padding: 12px; background: linear-gradient(135deg, #ffc107, #ffb300); color: #000; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 14px; margin-top: 10px; }
-        button:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(255, 193, 7, 0.3); }
+        button:hover { transform: translateY(-2px); }
         .error { background: rgba(239, 83, 80, 0.2); border: 1px solid rgba(239, 83, 80, 0.5); color: #ef5350; padding: 12px; border-radius: 6px; margin-bottom: 20px; }
         .success { background: rgba(102, 187, 106, 0.2); border: 1px solid rgba(102, 187, 106, 0.5); color: #66bb6a; padding: 12px; border-radius: 6px; margin-bottom: 20px; }
         .demo-note { text-align: center; margin-top: 24px; padding-top: 24px; border-top: 1px solid #444; font-size: 12px; color: #a0a0a0; }

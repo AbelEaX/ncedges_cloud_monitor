@@ -127,6 +127,14 @@ class MonitoringService
             if ($previousStatus !== $currentStatus) {
                 $this->handleStatusChange($server, $previousStatus, $currentStatus);
             }
+
+            // Save metrics
+            $this->connection->insert('server_metrics', [
+                'server_id' => $server['id'],
+                'response_time' => 0, // Simplified for now
+                'status' => $currentStatus,
+                'checked_at' => date('Y-m-d H:i:s')
+            ]);
         }
         
         return $results;
@@ -154,8 +162,20 @@ class MonitoringService
         // Send notification
         if ($currentStatus === 'offline') {
             $this->sendServerDownNotification($server);
+            $this->notifications->sendInApp(
+                'system',
+                "[ALERT] {$server['name']}",
+                "Server {$server['name']} ({$server['host']}) is currently offline.",
+                'alert'
+            );
         } elseif ($currentStatus === 'online' && $previousStatus === 'offline') {
             $this->sendServerRecoveredNotification($server);
+            $this->notifications->sendInApp(
+                'system',
+                "[RECOVERY] {$server['name']}",
+                "Server {$server['name']} ({$server['host']}) is back online.",
+                'success'
+            );
         }
     }
     

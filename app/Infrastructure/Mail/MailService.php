@@ -147,7 +147,8 @@ class MailService
         $mailer->Timeout = $this->config['smtp']['timeout'];
         
         // SSL/TLS verification
-        if (!$this->config['smtp']['verify_ssl']) {
+        $verifySsl = $this->config['smtp']['verify_ssl'] ?? true;
+        if (!$verifySsl) {
             $mailer->SMTPOptions = [
                 'ssl' => [
                     'verify_peer' => false,

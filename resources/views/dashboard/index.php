@@ -26,17 +26,16 @@ $offlineCount = $totalServers - $onlineCount;
     <?= $themeService->getStyleTag(); ?>
     <style>
         :root {
-            --bg: #1a1a1a;
-            --sidebar: #1a1a1a;
-            --accent: #ffc107;
-            --card: #282828;
-            --border: #444444;
-            --text: #e0e0e0;
-            --muted: #a0a0a0;
-            --success: #66bb6a;
-            --danger: #ef5350;
-            --warning: #ffc107;
-            --info: #29b6f6;
+            --bg-color: var(--background, #f5f5f5);
+            --surface-color: var(--surface, #ffffff);
+            --border-color: var(--border, #e0e0e0);
+            --text-color: var(--text, #333333);
+            --primary-color: var(--primary, #3b82f6);
+            --success-color: var(--success, #10b981);
+            --danger-color: var(--danger, #ef4444);
+            --warning-color: var(--warning, #f59e0b);
+            --info-color: var(--info, #3b82f6);
+            --muted-color: var(--muted, #666666);
         }
         
         * {
@@ -46,119 +45,27 @@ $offlineCount = $totalServers - $onlineCount;
         }
         
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            font-size: 12px;
-            background: var(--bg);
-            color: var(--text);
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
+            font-family: var(--font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+            font-size: var(--base-size, 12px);
+            line-height: var(--line-height, 1.5);
+            background: var(--bg-color);
+            color: var(--text-color);
         }
         
-        /* Header */
-        .header {
-            background: var(--card);
-            padding: 15px 20px;
-            border-bottom: 1px solid var(--border);
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        
+        header {
+            margin-bottom: 30px;
+            background: var(--surface-color);
+            padding: 24px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-shrink: 0;
         }
-        
-        .header h1 {
-            font-size: 16px;
-            margin: 0;
-            color: var(--accent);
-        }
-        
-        .header-right {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-        }
-        
-        .logout-link {
-            color: var(--danger);
-            text-decoration: none;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        
-        /* Main Layout */
-        .main-container {
-            display: flex;
-            flex: 1;
-            width: 100%;
-            overflow: hidden;
-        }
-        
-        /* Sidebar */
-        .sidebar {
-            width: 200px;
-            background: var(--sidebar);
-            border-right: 1px solid var(--border);
-            padding: 20px 15px;
-            overflow-y: auto;
-            flex-shrink: 0;
-        }
-        
-        .sidebar h2 {
-            font-size: 11px;
-            text-transform: uppercase;
-            color: var(--accent);
-            margin-bottom: 12px;
-            border-bottom: 2px solid var(--accent);
-            padding-bottom: 8px;
-            letter-spacing: 1px;
-        }
-        
-        .nav-item {
-            display: block;
-            padding: 8px 12px;
-            color: var(--muted);
-            text-decoration: none;
-            border-radius: 4px;
-            margin-bottom: 4px;
-            font-size: 12px;
-            transition: all 0.2s;
-        }
-        
-        .nav-item:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: var(--text);
-        }
-        
-        .nav-item.active {
-            background: rgba(255, 193, 7, 0.2);
-            color: var(--accent);
-            font-weight: 600;
-        }
-        
-        .sidebar-stats {
-            margin-top: auto;
-            padding-top: 15px;
-            border-top: 1px solid var(--border);
-        }
-        
-        .stat {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            font-size: 11px;
-        }
-        
-        .stat-value {
-            font-weight: 700;
-            color: var(--accent);
-        }
-        
-        /* Content */
-        .content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-        }
+
+        h1 { font-size: 28px; }
         
         .content-header {
             margin-bottom: 20px;
@@ -170,7 +77,7 @@ $offlineCount = $totalServers - $onlineCount;
         .content-title {
             font-size: 18px;
             font-weight: 700;
-            color: var(--text);
+            color: var(--text-color);
         }
         
         /* Grid */
@@ -189,76 +96,46 @@ $offlineCount = $totalServers - $onlineCount;
         }
         
         .stat-card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            padding: 16px;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 24px;
             text-align: center;
         }
         
         .stat-card-number {
-            font-size: 28px;
+            font-size: 32px;
             font-weight: 700;
-            color: var(--accent);
-            margin-bottom: 4px;
+            color: var(--primary-color);
+            margin-bottom: 8px;
         }
         
         .stat-card-label {
-            font-size: 11px;
-            color: var(--muted);
+            font-size: 12px;
+            color: var(--muted-color);
             text-transform: uppercase;
+            font-weight: 600;
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <div class="header">
-        <h1><?= htmlspecialchars($config['name']); ?></h1>
-        <div class="header-right">
-            <span style="font-size: 11px; color: var(--muted);">
-                Refreshed: <span id="refresh-time"><?= date('H:i:s'); ?></span>
-            </span>
-            <a href="/api/auth/logout" class="logout-link">Logout</a>
-        </div>
-    </div>
+    <?= component('nav', ['user' => $user ?? null]) ?>
     
-    <!-- Main Container -->
-    <div class="main-container">
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <h2>Navigation</h2>
-            <a href="/dashboard" class="nav-item active">Dashboard</a>
-            <a href="/servers" class="nav-item">Manage Servers</a>
-            <a href="/reports" class="nav-item">Reports</a>
-            <a href="/settings" class="nav-item">Settings</a>
-            
-            <div class="sidebar-stats">
-                <h2>Statistics</h2>
-                <div class="stat">
-                    <span>Total Servers</span>
-                    <span class="stat-value" id="stat-total"><?= $totalServers; ?></span>
-                </div>
-                <div class="stat">
-                    <span>Online</span>
-                    <span class="stat-value" style="color: var(--success);" id="stat-online"><?= $onlineCount; ?></span>
-                </div>
-                <div class="stat">
-                    <span>Offline</span>
-                    <span class="stat-value" style="color: var(--danger);" id="stat-offline"><?= $offlineCount; ?></span>
-                </div>
+    <div class="container">
+        <header>
+            <div>
+                <h1>Infrastructure Overview</h1>
+                <p style="color: var(--muted-color); font-size: 14px; margin-top: 5px;">
+                    <?= $totalServers; ?> servers monitored
+                </p>
             </div>
-        </div>
+            <div style="text-align: right; color: var(--muted-color); font-size: 13px;">
+                Refreshed: <span id="refresh-time" style="font-family: monospace;"><?= date('H:i:s'); ?></span>
+            </div>
+        </header>
         
         <!-- Content -->
         <div class="content">
-            <div class="content-header">
-                <div>
-                    <h2 class="content-title">Infrastructure Overview</h2>
-                    <p style="color: var(--muted); font-size: 11px; margin-top: 4px;">
-                        <?= $totalServers; ?> servers monitored
-                    </p>
-                </div>
-            </div>
             
             <!-- Stats Cards -->
             <div class="stats-grid">
@@ -279,15 +156,15 @@ $offlineCount = $totalServers - $onlineCount;
             <!-- Servers Grid -->
             <?php if (empty($servers)): ?>
             <div style="
-                background: var(--card);
-                border: 1px solid var(--border);
-                border-radius: 4px;
+                background: var(--surface-color);
+                border: 1px solid var(--border-color);
+                border-radius: 8px;
                 padding: 40px;
                 text-align: center;
-                color: var(--muted);
+                color: var(--muted-color);
             ">
                 <p style="margin: 0; font-size: 14px;">No servers configured yet</p>
-                <a href="/servers" style="color: var(--accent); text-decoration: none; font-weight: 600; margin-top: 12px; display: inline-block;">
+                <a href="/servers" style="color: var(--primary-color); text-decoration: none; font-weight: 600; margin-top: 12px; display: inline-block;">
                     Add Servers
                 </a>
             </div>

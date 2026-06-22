@@ -212,14 +212,13 @@ class NotificationManager
         
         // Store in-app notification in database
         $this->connection->insert('notifications', [
-            'user_id' => $userId,
-            'title' => $title,
+            'recipient' => $userId,
+            'subject' => $title,
             'message' => $message,
             'type' => $type,
-            'data' => json_encode($data),
-            'is_read' => 0,
-            'created_at' => date('Y-m-d H:i:s'),
-            'updated_at' => date('Y-m-d H:i:s')
+            'channel' => 'in_app',
+            'status' => 'pending',
+            'created_at' => date('Y-m-d H:i:s')
         ]);
         
         $this->logger->info(
@@ -248,7 +247,7 @@ class NotificationManager
         $timeAgo = date('Y-m-d H:i:s', strtotime("-{$minutes} minutes"));
         
         $count = $this->connection->fetchOne(
-            'SELECT COUNT(*) as count FROM notifications WHERE user_id = ? AND created_at >= ?',
+            'SELECT COUNT(*) as count FROM notifications WHERE recipient = ? AND created_at >= ?',
             [$recipient, $timeAgo]
         );
         

@@ -37,7 +37,6 @@ $cancelAction = $cancelAction ?? "document.getElementById('{$id}').remove()";
         padding: 24px;
         max-width: 500px;
         width: 90%;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
     ">
         <h2 style="margin: 0 0 12px 0; font-size: 16px; color: var(--text);">
             <?= htmlspecialchars($title); ?>

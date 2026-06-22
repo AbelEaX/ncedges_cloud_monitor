@@ -160,12 +160,30 @@ class AuthenticationService
             return false;
         }
         
+        $role = $this->user['role'] ?? 'viewer';
+        
         // Admin has all permissions
-        if ($this->user['role'] === 'admin') {
+        if ($role === 'admin') {
             return true;
         }
         
-        // Check user permissions
+        // Manager has management access (create/update servers, view reports)
+        if ($role === 'manager') {
+            if (in_array($permission, ['server.view', 'server.create', 'server.edit', 'reports.view', 'audit.view', 'settings.view'])) {
+                return true;
+            }
+            return false;
+        }
+        
+        // Viewer has read-only access
+        if ($role === 'viewer') {
+            if (in_array($permission, ['server.view', 'reports.view', 'audit.view'])) {
+                return true;
+            }
+            return false;
+        }
+        
+        // Check user permissions table as fallback
         $result = $this->connection->fetchOne(
             'SELECT 1 FROM user_permissions WHERE user_id = ? AND permission = ?',
             [$this->user['id'], $permission]
