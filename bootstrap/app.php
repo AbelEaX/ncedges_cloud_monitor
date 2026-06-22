@@ -54,7 +54,7 @@ if ($isDevelopment) {
 set_exception_handler(function (\Throwable $e) use ($isDevelopment) {
     // Log the exception
     global $container;
-    if (isset($container) && $container->has(\App\Infrastructure\Logging\Logger::class)) {
+    if (isset($container) && $container->bound(\App\Infrastructure\Logging\Logger::class)) {
         $container->resolve(\App\Infrastructure\Logging\Logger::class)->error(
             'Uncaught Exception: ' . $e->getMessage(),
             ['trace' => $e->getTraceAsString()],

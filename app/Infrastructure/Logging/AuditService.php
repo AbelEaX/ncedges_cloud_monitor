@@ -64,6 +64,9 @@ class AuditService
         array $details = [],
         string $severity = 'info'
     ): void {
+        if (!config('app.features.audit_logging_enabled', true)) {
+            return;
+        }
         // Get user ID from session if not provided
         if ($user_id === null && isset($_SESSION['user_id'])) {
             $user_id = $_SESSION['user_id'];

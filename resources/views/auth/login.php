@@ -8,7 +8,7 @@ $error = $_GET['error'] ?? '';
 $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
 ?>
 <!DOCTYPE html>
-<html lang="en" data-theme="<?= htmlspecialchars($themeService->getCurrentTheme()); ?>">
+<html lang="<?= htmlspecialchars(config('app.locale', 'en')); ?>" data-theme="<?= htmlspecialchars($themeService->getCurrentTheme()); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">

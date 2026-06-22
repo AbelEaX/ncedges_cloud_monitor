@@ -5,11 +5,11 @@
 $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
 ?>
 <!DOCTYPE html>
-<html lang="en" data-theme="<?= htmlspecialchars($themeService->getCurrentTheme()); ?>">
+<html lang="<?= htmlspecialchars(config('app.locale', 'en')); ?>" data-theme="<?= htmlspecialchars($themeService->getCurrentTheme()); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reports & Analytics - Monitor</title>
+    <title>Reports & Analytics - <?= htmlspecialchars(config('app.name', 'Monitor')); ?></title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <?= $themeService->getStyleTag(); ?>
     <style>
@@ -313,6 +313,7 @@ $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
         </div>
 
         <!-- Activity Timeline -->
+        <?php if (config('app.features.activity_timeline_enabled', true)): ?>
         <div class="table-section">
             <h2>Activity Timeline</h2>
             <table id="activityTable">
@@ -333,6 +334,7 @@ $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
                 </tbody>
             </table>
         </div>
+        <?php endif; ?>
     </div>
 
     <script>

@@ -43,6 +43,10 @@ class ThemeService
      */
     protected function detectTheme(): string
     {
+        // If users are not allowed to change the theme, force the default
+        if (!($this->config['user_can_change'] ?? true)) {
+            return $this->config['default'] ?? 'dark';
+        }
         // Check user preference in session
         if (isset($_SESSION['theme'])) {
             return $_SESSION['theme'];
@@ -65,6 +69,10 @@ class ThemeService
      */
     public function setTheme(string $theme): void
     {
+        if (!($this->config['user_can_change'] ?? true)) {
+            throw new \Exception("Theme customization is disabled by the administrator.");
+        }
+        
         if (!isset($this->config['themes'][$theme])) {
             throw new \Exception("Theme not found: {$theme}");
         }

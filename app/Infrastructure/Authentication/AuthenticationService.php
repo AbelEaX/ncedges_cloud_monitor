@@ -81,6 +81,7 @@ class AuthenticationService
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['username'] = $user['username'];
         $_SESSION['logged_in'] = true;
+        $_SESSION['last_activity'] = time();
         
         $this->user = $user;
         
@@ -94,7 +95,25 @@ class AuthenticationService
      */
     public function isAuthenticated(): bool
     {
-        return isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true;
+        if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
+            return false;
+        }
+        
+        $timeout = $this->config['auth']['session_timeout'] ?? 7200;
+        
+        // Enforce session timeout if configured and > 0
+        if ($timeout > 0 && isset($_SESSION['last_activity'])) {
+            if (time() - $_SESSION['last_activity'] > $timeout) {
+                // Session expired
+                $this->logout();
+                return false;
+            }
+        }
+        
+        // Update last activity
+        $_SESSION['last_activity'] = time();
+        
+        return true;
     }
     
     /**

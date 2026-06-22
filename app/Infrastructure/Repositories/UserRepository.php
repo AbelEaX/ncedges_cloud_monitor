@@ -81,6 +81,15 @@ class UserRepository implements UserRepositoryInterface
      */
     public function create(User $user): int
     {
+        // Enforce password rules if password doesn't look like a bcrypt hash
+        if (!str_starts_with($user->password, '$2y$')) {
+            $errors = \App\Infrastructure\Authentication\PasswordValidator::validate($user->password);
+            if (!empty($errors)) {
+                throw new \Exception("Password validation failed: " . implode(" ", $errors));
+            }
+            $user->password = password_hash($user->password, PASSWORD_BCRYPT);
+        }
+
         return $this->connection->insert('users', [
             'username' => $user->username,
             'email' => $user->email,
@@ -100,6 +109,15 @@ class UserRepository implements UserRepositoryInterface
      */
     public function update(User $user): bool
     {
+        // Enforce password rules if password doesn't look like a bcrypt hash
+        if (!str_starts_with($user->password, '$2y$')) {
+            $errors = \App\Infrastructure\Authentication\PasswordValidator::validate($user->password);
+            if (!empty($errors)) {
+                throw new \Exception("Password validation failed: " . implode(" ", $errors));
+            }
+            $user->password = password_hash($user->password, PASSWORD_BCRYPT);
+        }
+
         $count = $this->connection->update(
             'users',
             [

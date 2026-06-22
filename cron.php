@@ -24,6 +24,12 @@ global $container;
 $logger = $container->resolve(\App\Infrastructure\Logging\Logger::class);
 $monitoringService = $container->resolve(\App\Infrastructure\Monitoring\MonitoringService::class);
 
+if (!config('monitoring.health_check.enabled', true)) {
+    echo "Health checks are currently disabled in settings.\n";
+    $logger->info("Cron: Skipped monitoring, health checks disabled in settings.", [], 'cron');
+    exit(0);
+}
+
 $startTime = microtime(true);
 $logger->info("Cron: Started monitoring all servers.", [], 'cron');
 

@@ -110,7 +110,7 @@ if ($currentPath === '' || $currentPath === 'index') {
 
 <nav>
     <div class="nav-content">
-        <a href="/dashboard.php" class="nav-logo">📡 Monitor</a>
+        <a href="/dashboard.php" class="nav-logo">📡 <?= htmlspecialchars(config('app.name', 'Monitor')); ?></a>
         <div class="nav-links">
             <a href="/dashboard.php" class="<?= $currentPath === 'dashboard' ? 'active' : '' ?>">Dashboard</a>
             <a href="/servers.php" class="<?= $currentPath === 'servers' ? 'active' : '' ?>">Servers</a>
@@ -118,10 +118,12 @@ if ($currentPath === '' || $currentPath === 'index') {
             <a href="/reports.php" class="<?= $currentPath === 'reports' ? 'active' : '' ?>">Reports</a>
         </div>
         <div class="nav-user">
+            <?php if (config('theme.user_can_change', true)): ?>
             <button onclick="toggleTheme()" class="theme-toggle-btn" title="Toggle Theme">
                 <span class="light-icon" style="display: none;">☀️</span>
                 <span class="dark-icon" style="display: none;">🌙</span>
             </button>
+            <?php endif; ?>
             <?php if ($user): ?>
             <div class="user-avatar"><?php echo strtoupper(substr($user->getUsername() ?? 'U', 0, 1)); ?></div>
             <div style="font-size: 14px;">
