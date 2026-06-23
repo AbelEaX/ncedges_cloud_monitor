@@ -19,7 +19,7 @@ $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
             --surface-color: var(--surface, #ffffff);
             --border-color: var(--border, #e0e0e0);
             --text-color: var(--text, #333333);
-            --primary-color: var(--primary, #3b82f6);
+            --primary-color: var(--primary, #ec1d63);
             --success-color: var(--success, #10b981);
             --danger-color: var(--danger, #ef4444);
             --warning-color: var(--warning, #f59e0b);
@@ -123,6 +123,10 @@ $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
             background: rgba(239, 68, 68, 0.15);
             color: var(--danger-color);
         }
+        .status-pending {
+            background: rgba(158, 158, 158, 0.15);
+            color: #9e9e9e;
+        }
         .actions {
             display: flex;
             gap: 8px;
@@ -184,6 +188,21 @@ $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
         [data-theme="dark"] .dark-icon { display: none !important; }
         [data-theme="light"] .dark-icon { display: inline !important; }
         [data-theme="light"] .light-icon { display: none !important; }
+        .footer-sticky {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: var(--surface-color);
+            border-top: 1px solid var(--border-color);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: var(--muted-color);
+            z-index: 100;
+        }
     </style>
 </head>
 <body>
@@ -255,15 +274,44 @@ $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
         </div>
     </div>
 
+    <div class="footer-sticky">
+        <div>
+            Total Servers: <strong id="footerTotal" style="color: var(--text-color);">0</strong> | 
+            Status: <strong id="footerStatus" style="color: var(--success-color);">Healthy</strong>
+        </div>
+        <div>
+            Last Updated: <span id="footerLastUpdate" style="font-family: monospace;"><?php echo date('H:i:s'); ?></span> | 
+            Next Refresh: <span id="footerCountdown" style="font-family: monospace; color: var(--primary-color);">15s</span>
+        </div>
+    </div>
+
     <script>
         const canCreateServer = <?= $auth->hasPermission('server.create') ? 'true' : 'false' ?>;
         const canEditServer = <?= $auth->hasPermission('server.edit') ? 'true' : 'false' ?>;
         const canDeleteServer = <?= $auth->hasPermission('server.delete') ? 'true' : 'false' ?>;
 
         // Load servers on page load
-        document.addEventListener('DOMContentLoaded', loadServers);
+        document.addEventListener('DOMContentLoaded', () => {
+            loadServers();
+            startCountdown();
+            setInterval(loadServers, 15000);
+        });
+
+        let isRefreshing = false;
+        let countdown = 15;
+        
+        function startCountdown() {
+            setInterval(() => {
+                countdown--;
+                if (countdown < 0) countdown = 15;
+                document.getElementById('footerCountdown').textContent = countdown + 's';
+            }, 1000);
+        }
 
         function loadServers() {
+            if (isRefreshing) return;
+            isRefreshing = true;
+            document.getElementById('servers-list').style.opacity = '0.7';
             fetch('/api/servers/list.php')
                 .then(response => response.json())
                 .then(data => {
@@ -276,6 +324,17 @@ $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
                 .catch(error => {
                     console.error('Error:', error);
                     showAlert('Failed to load servers', 'error');
+                })
+                .finally(() => {
+                    document.getElementById('servers-list').style.opacity = '1';
+                    isRefreshing = false;
+                    const now = new Date();
+                    document.getElementById('footerLastUpdate').textContent = 
+                        String(now.getHours()).padStart(2, '0') + ':' +
+                        String(now.getMinutes()).padStart(2, '0') + ':' +
+                        String(now.getSeconds()).padStart(2, '0');
+                    countdown = 15;
+                    document.getElementById('footerCountdown').textContent = countdown + 's';
                 });
         }
 
@@ -327,8 +386,12 @@ $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
                     status = 'offline';
                     statusText = 'Offline';
                     badgeClass = 'status-offline'; // Assuming red badge
+                } else if (server.status === 'in_progress') {
+                    statusText = 'Checking...';
+                    badgeClass = 'status-pending';
                 } else {
                     statusText = 'Pending Check';
+                    badgeClass = 'status-pending';
                 }
 
                 const created = new Date(server.created_at).toLocaleDateString();
@@ -363,6 +426,18 @@ $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
             `;
 
             container.innerHTML = html;
+            
+            // Update footer
+            document.getElementById('footerTotal').textContent = servers.length;
+            const offline = servers.filter(s => s.status === 'offline').length;
+            const footerStatus = document.getElementById('footerStatus');
+            if (offline > 0) {
+                footerStatus.textContent = `${offline} Offline`;
+                footerStatus.style.color = 'var(--danger-color)';
+            } else {
+                footerStatus.textContent = 'All Healthy';
+                footerStatus.style.color = 'var(--success-color)';
+            }
         }
 
         function openCreateForm() {

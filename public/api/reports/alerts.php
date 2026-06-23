@@ -16,17 +16,27 @@ if (!$auth->isAuthenticated() || !$auth->hasPermission('reports.view')) {
 }
 
 try {
-    $range = $_GET['range'] ?? '7d';
-    $rangeFilter = match($range) {
-        '24h' => '-1 day',
-        '30d' => '-30 days',
-        '90d' => '-90 days',
-        default => '-7 days',
-    };
+    $startDate = $_GET['startDate'] ?? null;
+    $endDate = $_GET['endDate'] ?? null;
+    
+    if ($startDate && $endDate) {
+        $whereClause = "created_at BETWEEN :start AND :end";
+        $params = ['start' => $startDate . ' 00:00:00', 'end' => $endDate . ' 23:59:59'];
+    } else {
+        $range = $_GET['range'] ?? '7d';
+        $rangeFilter = match($range) {
+            '24h' => '-1 day',
+            '30d' => '-30 days',
+            '90d' => '-90 days',
+            default => '-7 days',
+        };
+        $whereClause = "created_at >= datetime('now', :range)";
+        $params = ['range' => $rangeFilter];
+    }
     
     $connection = app(\App\Infrastructure\Database\Connection::class);
-    $sql = "SELECT subject, message, type as channel, status, created_at FROM notifications WHERE created_at >= datetime('now', :range) ORDER BY created_at DESC LIMIT 50";
-    $notifications = $connection->fetchAll($sql, ['range' => $rangeFilter]);
+    $sql = "SELECT subject, message, type as channel, status, created_at FROM notifications WHERE $whereClause ORDER BY created_at DESC LIMIT 50";
+    $notifications = $connection->fetchAll($sql, $params);
 
     $alerts = [];
     foreach ($notifications as $n) {

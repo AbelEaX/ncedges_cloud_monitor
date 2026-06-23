@@ -25,12 +25,12 @@ return [
     // Color Palette
     'colors' => [
         // Primary Colors
-        'primary' => env('THEME_PRIMARY_COLOR', '#ffc107'),
+        'primary' => env('THEME_PRIMARY_COLOR', '#ec1d63'),
         'secondary' => env('THEME_SECONDARY_COLOR', '#29b6f6'),
         
         // Status Colors
         'success' => env('THEME_SUCCESS_COLOR', '#66bb6a'),
-        'warning' => env('THEME_WARNING_COLOR', '#ffc107'),
+        'warning' => env('THEME_WARNING_COLOR', '#ec1d63'),
         'danger' => env('THEME_DANGER_COLOR', '#ef5350'),
         'info' => env('THEME_INFO_COLOR', '#29b6f6'),
         

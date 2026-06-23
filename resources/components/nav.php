@@ -114,7 +114,9 @@ if ($currentPath === '' || $currentPath === 'index') {
         <div class="nav-links">
             <a href="/dashboard.php" class="<?= $currentPath === 'dashboard' ? 'active' : '' ?>">Dashboard</a>
             <a href="/servers.php" class="<?= $currentPath === 'servers' ? 'active' : '' ?>">Servers</a>
+            <?php if ($auth->hasPermission('settings.view')): ?>
             <a href="/settings.php" class="<?= $currentPath === 'settings' ? 'active' : '' ?>">Settings</a>
+            <?php endif; ?>
             <a href="/reports.php" class="<?= $currentPath === 'reports' ? 'active' : '' ?>">Reports</a>
         </div>
         <div class="nav-user">

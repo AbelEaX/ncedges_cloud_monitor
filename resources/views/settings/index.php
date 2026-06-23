@@ -17,7 +17,7 @@ $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
             --surface-color: var(--surface, #ffffff);
             --border-color: var(--border, #e0e0e0);
             --text-color: var(--text, #333333);
-            --primary-color: var(--primary, #3b82f6);
+            --primary-color: var(--primary, #ec1d63);
             --success-color: var(--success, #10b981);
             --danger-color: var(--danger, #ef4444);
             --warning-color: var(--warning, #f59e0b);

@@ -16,14 +16,23 @@ if (!$auth->isAuthenticated() || !$auth->hasPermission('reports.view')) {
 }
 
 try {
-    $range = $_GET['range'] ?? '7d';
+    $startDate = $_GET['startDate'] ?? null;
+    $endDate = $_GET['endDate'] ?? null;
     
-    $rangeFilter = match($range) {
-        '24h' => '-1 day',
-        '30d' => '-30 days',
-        '90d' => '-90 days',
-        default => '-7 days',
-    };
+    if ($startDate && $endDate) {
+        $whereClause = "checked_at BETWEEN :start AND :end";
+        $params = ['start' => $startDate . ' 00:00:00', 'end' => $endDate . ' 23:59:59'];
+    } else {
+        $range = $_GET['range'] ?? '7d';
+        $rangeFilter = match($range) {
+            '24h' => '-1 day',
+            '30d' => '-30 days',
+            '90d' => '-90 days',
+            default => '-7 days',
+        };
+        $whereClause = "checked_at >= datetime('now', :range)";
+        $params = ['range' => $rangeFilter];
+    }
 
     // Get metrics data dynamically
     $total = 0;
@@ -52,8 +61,8 @@ try {
         $alertsCountRow = $connection->fetchOne("SELECT COUNT(*) as cnt FROM notifications");
         $alertsCount = $alertsCountRow ? (int) $alertsCountRow['cnt'] : 0;
         
-        $uptimeSql = "SELECT (SUM(CASE WHEN status = 'online' THEN 1 ELSE 0 END) * 100.0 / NULLIF(COUNT(*), 0)) as avg_uptime FROM server_metrics WHERE checked_at >= datetime('now', :range)";
-        $uptimeRow = $connection->fetchOne($uptimeSql, ['range' => $rangeFilter]);
+        $uptimeSql = "SELECT (SUM(CASE WHEN status = 'online' THEN 1 ELSE 0 END) * 100.0 / NULLIF(COUNT(*), 0)) as avg_uptime FROM server_metrics WHERE $whereClause";
+        $uptimeRow = $connection->fetchOne($uptimeSql, $params);
         if ($uptimeRow && $uptimeRow['avg_uptime'] !== null) {
             $avgUptime = round((float)$uptimeRow['avg_uptime'], 2);
         }
@@ -71,7 +80,8 @@ try {
 
     // Log action
     $audit = app(\App\Infrastructure\Logging\AuditService::class);
-    $audit->log('read', 'reports_metrics', null, $auth->user()->id, ['message' => "Retrieved metrics for period: $range"]);
+    $periodStr = ($startDate && $endDate) ? "$startDate to $endDate" : ($range ?? '7d');
+    $audit->log('read', 'reports_metrics', null, $auth->user()->id, ['message' => "Retrieved metrics for period: $periodStr"]);
 
     header('Content-Type: application/json');
     echo json_encode([

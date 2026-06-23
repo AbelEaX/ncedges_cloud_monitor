@@ -131,7 +131,7 @@ $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
         .login-header h1 {
             font-size: 24px;
             font-weight: 700;
-            color: #ffc107;
+            color: #ec1d63;
             margin-bottom: 8px;
         }
         
@@ -167,7 +167,7 @@ $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
         
         .form-group input:focus {
             outline: none;
-            border-color: #ffc107;
+            border-color: #ec1d63;
             background: rgba(60, 70, 100, 0.8);
             box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.1);
         }
@@ -179,7 +179,7 @@ $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
         .login-button {
             width: 100%;
             padding: 12px 16px;
-            background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
+            background: linear-gradient(135deg, #ec1d63 0%, #ffb300 100%);
             color: #000;
             border: none;
             border-radius: 6px;
@@ -228,7 +228,7 @@ $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
         }
         
         .demo-note strong {
-            color: #ffc107;
+            color: #ec1d63;
             display: block;
             margin-bottom: 4px;
         }
@@ -242,7 +242,7 @@ $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
         [data-theme="light"] .form-group label { color: var(--text-color, #333); }
         [data-theme="light"] .login-header p { color: var(--muted-color, #666); }
         [data-theme="light"] .demo-note { color: var(--muted-color, #666); border-top: 1px solid var(--border-color, #ddd); }
-        [data-theme="light"] .demo-note strong { color: var(--primary-color, #ffc107); }
+        [data-theme="light"] .demo-note strong { color: var(--primary-color, #ec1d63); }
         [data-theme="light"] .error-message { background: rgba(239, 83, 80, 0.1); border: 1px solid rgba(239, 83, 80, 0.3); }
         
         .theme-toggle-btn { position: absolute; top: 20px; right: 20px; background: none; border: none; cursor: pointer; font-size: 24px; z-index: 10; opacity: 0.8; transition: opacity 0.3s; }

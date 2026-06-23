@@ -219,19 +219,19 @@ try {
             <div class="info-grid">
                 <div class="info-box">
                     <h3>Total Servers</h3>
-                    <div class="value"><?php echo $totalServers; ?></div>
+                    <div class="value" id="val-total"><?php echo $totalServers; ?></div>
                 </div>
                 <div class="info-box">
                     <h3>Online</h3>
-                    <div class="value" style="color: #10b981;"><?php echo $onlineServers; ?></div>
+                    <div class="value" id="val-online" style="color: #10b981;"><?php echo $onlineServers; ?></div>
                 </div>
                 <div class="info-box">
                     <h3>Offline</h3>
-                    <div class="value" style="color: #ef4444;"><?php echo $offlineServers; ?></div>
+                    <div class="value" id="val-offline" style="color: #ef4444;"><?php echo $offlineServers; ?></div>
                 </div>
                 <div class="info-box">
                     <h3>Alerts</h3>
-                    <div class="value" style="color: #f59e0b;"><?php echo $alertsCount; ?></div>
+                    <div class="value" id="val-alerts" style="color: #f59e0b;"><?php echo $alertsCount; ?></div>
                 </div>
             </div>
         </div>
@@ -250,6 +250,7 @@ try {
             </a>
 
             <!-- Settings Section -->
+            <?php if ($auth->hasPermission('settings.view')): ?>
             <a href="/settings.php" class="section-card">
                 <h2>⚙️ Settings</h2>
                 <p>Configure application settings</p>
@@ -260,6 +261,7 @@ try {
                 </ul>
                 <button class="btn">Configure Settings →</button>
             </a>
+            <?php endif; ?>
 
             <!-- Reports Section -->
             <a href="/reports.php" class="section-card">
@@ -286,6 +288,32 @@ try {
             html.setAttribute('data-theme', newTheme);
             document.cookie = "theme=" + newTheme + "; path=/; max-age=31536000";
         }
+        
+        let isRefreshing = false;
+        function refreshDashboard() {
+            if (isRefreshing) return;
+            isRefreshing = true;
+            
+            // Add slight opacity to indicate loading
+            document.querySelector('.info-grid').style.opacity = '0.7';
+            
+            fetch('/api/reports/metrics.php?range=7d')
+                .then(r => r.json())
+                .then(res => {
+                    if (res.success) {
+                        document.getElementById('val-total').textContent = res.data.total_servers;
+                        document.getElementById('val-online').textContent = res.data.online_servers;
+                        document.getElementById('val-offline').textContent = res.data.offline_servers;
+                        document.getElementById('val-alerts').textContent = res.data.alert_count;
+                    }
+                })
+                .finally(() => {
+                    document.querySelector('.info-grid').style.opacity = '1';
+                    isRefreshing = false;
+                });
+        }
+        
+        setInterval(refreshDashboard, 15000);
     </script>
 </body>
 </html>

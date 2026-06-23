@@ -188,7 +188,7 @@ class AuthenticationService
         
         // Manager has management access (create/update servers, view reports)
         if ($role === 'manager') {
-            if (in_array($permission, ['server.view', 'server.create', 'server.edit', 'reports.view', 'audit.view', 'settings.view'])) {
+            if (in_array($permission, ['server.view', 'server.create', 'server.edit', 'reports.view', 'reports.export', 'audit.view', 'settings.view'])) {
                 return true;
             }
             return false;

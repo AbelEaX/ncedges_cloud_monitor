@@ -63,6 +63,16 @@ return [
             'color' => '#29b6f6',
             'badge' => 'info',
         ],
+        'pending' => [
+            'label' => 'Pending',
+            'color' => '#9e9e9e',
+            'badge' => 'secondary',
+        ],
+        'in_progress' => [
+            'label' => 'Checking...',
+            'color' => '#ab47bc',
+            'badge' => 'info',
+        ],
     ],
     
     // Server Groups (Optional)

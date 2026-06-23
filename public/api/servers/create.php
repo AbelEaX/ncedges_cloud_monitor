@@ -41,7 +41,7 @@ try {
         host: $host,
         port: isset($input['port']) ? (int) $input['port'] : 443,
         description: $description,
-        status: 'unknown',
+        status: 'pending',
         group_name: $group_name,
         is_active: isset($input['is_active']) ? (bool) $input['is_active'] : true
     );
@@ -51,6 +51,14 @@ try {
     // Log action
     $audit = app(\App\Infrastructure\Logging\AuditService::class);
     $audit->log('create', 'servers', $serverId, $auth->user()->id, ['message' => 'Created new server', 'server' => (array)$server], 'info');
+
+    // Trigger immediate background check
+    $cmd = "php " . escapeshellarg(dirname(__DIR__, 3) . '/background_check.php') . " " . (int)$serverId;
+    if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+        pclose(popen("start /B " . $cmd, "r"));
+    } else {
+        exec($cmd . " > /dev/null 2>&1 &");
+    }
 
     header('Content-Type: application/json');
     echo json_encode([

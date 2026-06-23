@@ -9,7 +9,7 @@
 require dirname(__DIR__, 3) . '/bootstrap/app.php';
 
 $auth = app(\App\Infrastructure\Authentication\AuthenticationService::class);
-if (!$auth->isAuthenticated() || !$auth->hasPermission('reports.view')) {
+if (!$auth->isAuthenticated() || !$auth->hasPermission('reports.export')) {
     header('HTTP/1.1 401 Unauthorized');
     exit;
 }
@@ -46,19 +46,63 @@ try {
         ];
     }
 
+    // Log action BEFORE streaming the response (as stream() and exit() will stop execution)
+    $audit = app(\App\Infrastructure\Logging\AuditService::class);
+    $userId = $auth->user() ? $auth->user()->getId() : 0;
+    $audit->log('export', 'reports', null, $userId, ['message' => "Exported report as $format"]);
+
     if ($format === 'csv') {
         // Export as CSV
         header('Content-Type: text/csv');
         header('Content-Disposition: attachment; filename="report-' . date('Y-m-d') . '.csv"');
 
         $output = fopen('php://output', 'w');
-        fputcsv($output, ['Server', 'Uptime 24h', 'Uptime 7d', 'Uptime 30d', 'Status']);
+        fputcsv($output, ['Server', 'Uptime 24h', 'Uptime 7d', 'Uptime 30d', 'Status'], ',', '"', '\\');
 
         foreach ($data as $row) {
-            fputcsv($output, $row);
+            fputcsv($output, $row, ',', '"', '\\');
         }
 
-        fclose($output);
+        // Do NOT fclose($output) as it can cause ERR_INVALID_RESPONSE in some PHP SAPIs
+        exit;
+        
+    } else if ($format === 'xls' || $format === 'xlsx' || $format === 'excel') {
+        // Export as Excel using PhpSpreadsheet
+        require_once dirname(__DIR__, 3) . '/vendor/autoload.php';
+        
+        if (!class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class)) {
+            throw new Exception('PhpSpreadsheet library is not installed');
+        }
+
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('System Health Report');
+
+        // Headers
+        $sheet->setCellValue('A1', 'Server');
+        $sheet->setCellValue('B1', 'Uptime 24h');
+        $sheet->setCellValue('C1', 'Uptime 7d');
+        $sheet->setCellValue('D1', 'Uptime 30d');
+        $sheet->setCellValue('E1', 'Status');
+
+        // Data
+        $rowIdx = 2;
+        foreach ($data as $row) {
+            $sheet->setCellValue('A' . $rowIdx, $row[0]);
+            $sheet->setCellValue('B' . $rowIdx, $row[1]);
+            $sheet->setCellValue('C' . $rowIdx, $row[2]);
+            $sheet->setCellValue('D' . $rowIdx, $row[3]);
+            $sheet->setCellValue('E' . $rowIdx, $row[4]);
+            $rowIdx++;
+        }
+
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="server-report-' . date('Y-m-d') . '.xlsx"');
+        
+        $writer->save('php://output');
+        exit;
         
     } else if ($format === 'pdf') {
         // Export as PDF using Dompdf
@@ -104,14 +148,11 @@ try {
         $dompdf->render();
         
         $dompdf->stream('server-report-' . date('Y-m-d') . '.pdf', array("Attachment" => true));
+        exit;
         
     } else {
         throw new Exception('Invalid export format');
     }
-
-    // Log action
-    $audit = app(\App\Infrastructure\Logging\AuditService::class);
-    $audit->log('export', 'reports', null, $auth->user()->id, ['message' => "Exported report as $format"]);
     
 } catch (Exception $e) {
     header('HTTP/1.1 500 Internal Server Error');

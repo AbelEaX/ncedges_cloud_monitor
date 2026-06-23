@@ -16,7 +16,7 @@ php database/seed.php
 ### 2️⃣ Start Server (1 min)
 ```bash
 # From project root
-php -S localhost:8000 -t public
+php -S localhost:8000 router.php
 ```
 
 ### 3️⃣ Login (1 min)
@@ -49,7 +49,7 @@ sudo apt-get install php-sqlite3  # or php-mysql, php-pgsql
 ### Port 8000 Already in Use
 ```bash
 # Use different port
-php -S localhost:8080 -t public
+php -S localhost:8080 router.php
 # Access: http://localhost:8080/
 ```
 

@@ -16,13 +16,23 @@ if (!$auth->isAuthenticated() || !$auth->hasPermission('reports.view')) {
 }
 
 try {
-    $range = $_GET['range'] ?? '7d';
-    $rangeFilter = match($range) {
-        '24h' => '-1 day',
-        '30d' => '-30 days',
-        '90d' => '-90 days',
-        default => '-7 days',
-    };
+    $startDate = $_GET['startDate'] ?? null;
+    $endDate = $_GET['endDate'] ?? null;
+    
+    if ($startDate && $endDate) {
+        $whereClause = "a.created_at BETWEEN :start AND :end";
+        $params = ['start' => $startDate . ' 00:00:00', 'end' => $endDate . ' 23:59:59'];
+    } else {
+        $range = $_GET['range'] ?? '7d';
+        $rangeFilter = match($range) {
+            '24h' => '-1 day',
+            '30d' => '-30 days',
+            '90d' => '-90 days',
+            default => '-7 days',
+        };
+        $whereClause = "a.created_at >= datetime('now', :range)";
+        $params = ['range' => $rangeFilter];
+    }
     
     $connection = app(\App\Infrastructure\Database\Connection::class);
     $sql = "
@@ -33,12 +43,12 @@ try {
         a.created_at 
     FROM audit_logs a
     LEFT JOIN users u ON a.user_id = u.id
-    WHERE a.created_at >= datetime('now', :range)
+    WHERE $whereClause
     ORDER BY a.created_at DESC 
     LIMIT 50
     ";
     
-    $activity = $connection->fetchAll($sql, ['range' => $rangeFilter]);
+    $activity = $connection->fetchAll($sql, $params);
 
     header('Content-Type: application/json');
     echo json_encode([

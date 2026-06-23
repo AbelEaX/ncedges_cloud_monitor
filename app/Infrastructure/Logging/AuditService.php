@@ -286,7 +286,7 @@ class AuditService
         $output = fopen('php://output', 'w');
         
         // Header row
-        fputcsv($output, ['Timestamp', 'User', 'Action', 'Entity Type', 'Details', 'IP Address']);
+        fputcsv($output, ['Timestamp', 'User', 'Action', 'Entity Type', 'Details', 'IP Address'], ',', '"', '\\');
         
         // Data rows
         foreach ($logs as $log) {
@@ -297,7 +297,7 @@ class AuditService
                 $log['entity_type'] ?? '',
                 $log['details'] ?? '',
                 $log['ip_address'] ?? '',
-            ]);
+            ], ',', '"', '\\');
         }
         
         fclose($output);

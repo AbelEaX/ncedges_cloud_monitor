@@ -11,6 +11,8 @@ $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reports & Analytics - <?= htmlspecialchars(config('app.name', 'Monitor')); ?></title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <?= $themeService->getStyleTag(); ?>
     <style>
         :root {
@@ -18,7 +20,7 @@ $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
             --surface-color: var(--surface, #ffffff);
             --border-color: var(--border, #e0e0e0);
             --text-color: var(--text, #333333);
-            --primary-color: var(--primary, #3b82f6);
+            --primary-color: var(--primary, #ec1d63);
             --success-color: var(--success, #10b981);
             --danger-color: var(--danger, #ef4444);
             --warning-color: var(--warning, #f59e0b);
@@ -221,14 +223,13 @@ $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
                 </div>
             </div>
             <div class="filters">
-                <select id="timeRange" onchange="updateReports()">
-                    <option value="24h">Last 24 Hours</option>
-                    <option value="7d" selected>Last 7 Days</option>
-                    <option value="30d">Last 30 Days</option>
-                    <option value="90d">Last 90 Days</option>
-                </select>
+                
+                    <input type="text" id="dateRange" class="btn btn-secondary" style="background: var(--bg-color); color: var(--text-color); min-width: 220px;" placeholder="Select Date Range">
+                <?php if (app(\App\Infrastructure\Authentication\AuthenticationService::class)->hasPermission('reports.export')): ?>
                 <button class="btn btn-primary" onclick="exportReport('pdf')">📥 Export PDF</button>
                 <button class="btn btn-secondary" onclick="exportReport('csv')">📥 Export CSV</button>
+                <button class="btn btn-secondary" onclick="exportReport('xls')" style="background-color: #10b981; color: white;">📥 Export Excel</button>
+                <?php endif; ?>
             </div>
         </header>
 
@@ -338,18 +339,48 @@ $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
     </div>
 
     <script>
-        // Load reports on page load
-        document.addEventListener('DOMContentLoaded', updateReports);
+        // Initialize Flatpickr
+        let fp;
+        document.addEventListener('DOMContentLoaded', () => {
+            const defaultStart = new Date();
+            defaultStart.setDate(defaultStart.getDate() - 7);
+            
+            fp = flatpickr("#dateRange", {
+                mode: "range",
+                dateFormat: "Y-m-d",
+                defaultDate: [defaultStart, new Date()],
+                onChange: function(selectedDates, dateStr, instance) {
+                    if (selectedDates.length === 2) {
+                        updateReports();
+                    }
+                }
+            });
+            
+            updateReports();
+        });
 
         function updateReports() {
-            const timeRange = document.getElementById('timeRange').value;
+            let startStr = '';
+            let endStr = '';
+            if (fp && fp.selectedDates.length === 2) {
+                startStr = fp.formatDate(fp.selectedDates[0], "Y-m-d");
+                endStr = fp.formatDate(fp.selectedDates[1], "Y-m-d");
+            } else {
+                // Fallback to 7 days
+                const d = new Date();
+                endStr = d.toISOString().split('T')[0];
+                d.setDate(d.getDate() - 7);
+                startStr = d.toISOString().split('T')[0];
+            }
+            
+            const query = `startDate=${startStr}&endDate=${endStr}`;
 
             // Load metrics
             Promise.all([
-                fetch(`/api/reports/metrics.php?range=${timeRange}`).then(r => r.json()),
-                fetch(`/api/reports/uptime.php?range=${timeRange}`).then(r => r.json()),
-                fetch(`/api/reports/alerts.php?range=${timeRange}`).then(r => r.json()),
-                fetch(`/api/reports/activity.php?range=${timeRange}`).then(r => r.json()),
+                fetch(`/api/reports/metrics.php?${query}`).then(r => r.json()),
+                fetch(`/api/reports/uptime.php?${query}`).then(r => r.json()),
+                fetch(`/api/reports/alerts.php?${query}`).then(r => r.json()),
+                fetch(`/api/reports/activity.php?${query}`).then(r => r.json()),
             ])
             .then(([metrics, uptime, alerts, activity]) => {
                 if (metrics.success) displayMetrics(metrics.data);
@@ -507,8 +538,13 @@ $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
         }
 
         function exportReport(format) {
-            const timeRange = document.getElementById('timeRange').value;
-            window.location.href = `/api/reports/export.php?format=${format}&range=${timeRange}`;
+            let startStr = '';
+            let endStr = '';
+            if (fp && fp.selectedDates.length === 2) {
+                startStr = fp.formatDate(fp.selectedDates[0], "Y-m-d");
+                endStr = fp.formatDate(fp.selectedDates[1], "Y-m-d");
+            }
+            window.location.href = `/api/reports/export.php?format=${format}&startDate=${startStr}&endDate=${endStr}`;
         }
 
         function toggleTheme() {
@@ -524,3 +560,4 @@ $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
     </script>
 </body>
 </html>
+

@@ -112,6 +112,9 @@ class MonitoringService
             $previousStatus = $server['status'] ?? 'unknown';
             $currentStatus = $isHealthy ? 'online' : 'offline';
             
+            // If the server was pending/in_progress and it's the first check, we still mark it online/offline
+            // But we don't need to alert on "unknown" to "online" typically
+            
             $results[] = [
                 'server_id' => $server['id'],
                 'name' => $server['name'],
@@ -160,7 +163,7 @@ class MonitoringService
         $this->updateServerStatus($server['id'], $currentStatus);
         
         // Send notification
-        if ($currentStatus === 'offline') {
+        if ($currentStatus === 'offline' && $previousStatus !== 'pending' && $previousStatus !== 'in_progress' && $previousStatus !== 'unknown') {
             $this->sendServerDownNotification($server);
             $this->notifications->sendInApp(
                 'system',
