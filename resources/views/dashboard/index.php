@@ -24,6 +24,8 @@ $offlineCount = $totalServers - $onlineCount;
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - <?= htmlspecialchars($config['name']); ?></title>
     <?= $themeService->getStyleTag(); ?>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-color: var(--background, #f5f5f5);
@@ -45,7 +47,7 @@ $offlineCount = $totalServers - $onlineCount;
         }
         
         body {
-            font-family: var(--font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+            font-family: 'Poppins', sans-serif;
             font-size: var(--base-size, 12px);
             line-height: var(--line-height, 1.5);
             background: var(--bg-color);
@@ -118,7 +120,7 @@ $offlineCount = $totalServers - $onlineCount;
         }
     </style>
 </head>
-<body>
+<body class="dashboard-bg">
     <?= component('nav', ['user' => $user ?? null]) ?>
     
     <div class="container">

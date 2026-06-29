@@ -14,6 +14,7 @@ $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <?= $themeService->getStyleTag(); ?>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-color: var(--background, #f5f5f5);
@@ -29,7 +30,7 @@ $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: var(--font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif);
+            font-family: 'Inter', sans-serif;
             background: var(--bg-color);
             color: var(--text-color);
         }

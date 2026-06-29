@@ -13,28 +13,30 @@ $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Server Management - <?= htmlspecialchars(config('app.name', 'Monitor')); ?></title>
     <?= $themeService->getStyleTag(); ?>
-    <style>
-        :root {
-            --bg-color: var(--background, #f5f5f5);
-            --surface-color: var(--surface, #ffffff);
-            --border-color: var(--border, #e0e0e0);
-            --text-color: var(--text, #333333);
-            --primary-color: var(--primary, #ec1d63);
-            --success-color: var(--success, #10b981);
-            --danger-color: var(--danger, #ef4444);
-            --warning-color: var(--warning, #f59e0b);
-            --info-color: var(--info, #3b82f6);
-            --muted-color: var(--muted, #6b7280);
-        }
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --bg-color: var(--background, #f5f5f5);
+        --surface-color: var(--surface, #ffffff);
+        --border-color: var(--border, #e0e0e0);
+        --text-color: var(--text, #333333);
+        --primary-color: var(--primary, #ec1d63);
+        --success-color: var(--success, #10b981);
+        --danger-color: var(--danger, #ef4444);
+        --warning-color: var(--warning, #f59e0b);
+        --info-color: var(--info, #3b82f6);
+        --muted-color: var(--muted, #6b7280);
+    }
+    [data-theme="dark"] {
+        --bg-color: #1a1a1a;
+        --surface-color: #262626;
+        --border-color: #444444;
+        --text-color: #e0e0e0;
+    }
+    * {margin:0;padding:0;box-sizing:border-box;}
+    body {font-family: 'Poppins', sans-serif;background: var(--bg-color);color: var(--text-color);}
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: var(--font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
-            font-size: var(--base-size, 12px);
-            line-height: var(--line-height, 1.5);
-            background: var(--bg-color);
-            color: var(--text-color);
-        }
+
         .container { max-width: 1200px; margin: 0 auto; padding: var(--container-padding, 20px); }
         header {
             display: flex;
@@ -60,7 +62,7 @@ $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
         }
         .btn-primary {
             background: var(--primary-color);
-            color: #000000;
+            color: #ffffff;
             font-weight: bold;
         }
         .btn-primary:hover {
@@ -281,7 +283,7 @@ $themeService = app(\App\Infrastructure\Logging\ThemeService::class);
         </div>
         <div>
             Last Updated: <span id="footerLastUpdate" style="font-family: monospace;"><?php echo date('H:i:s'); ?></span> | 
-            Next Refresh: <span id="footerCountdown" style="font-family: monospace; color: var(--primary-color);">15s</span>
+            Next Refresh: <span id="footerCountdown" style="color: #ffffff;">15s</span>
         </div>
     </div>
 

@@ -25,6 +25,7 @@ if ($currentPath === '' || $currentPath === 'index') {
 }
 ?>
 <meta name="csrf-token" content="<?= htmlspecialchars($csrfToken) ?>">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
     nav {
         background: var(--surface-color);
